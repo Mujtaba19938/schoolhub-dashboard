@@ -1,0 +1,5 @@
+{
+  "name": "SchoolHub Dashboard",
+  "description": "A comprehensive school management dashboard featuring real-time statistics, attendance tracking, financial overview, and student analytics.",
+  "requestFramePermissions": []
+}
