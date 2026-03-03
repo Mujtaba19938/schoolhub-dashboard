@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -1439,56 +1439,115 @@ const StudentsPage = () => {
 };
 
 const TeachersPage = () => {
-    const [teachers, setTeachers] = useState<Teacher[]>(teachersData);
+    const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [showAddModal, setShowAddModal] = useState(false);
     const [newTeacher, setNewTeacher] = useState({
         name: '', email: '', teacherId: '', subjects: '', classes: '', phone: '', address: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
+    // Fetch teachers from Supabase on mount
+    useEffect(() => {
+        const fetchTeachers = async () => {
+            try {
+                const { supabase } = await import('./supabaseClient');
+                const { data, error } = await supabase
+                    .from('teachers')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.warn('Failed to fetch teachers from Supabase:', error.message);
+                    setTeachers(teachersData);
+                    return;
+                }
+
+                if (data && data.length > 0) {
+                    setTeachers(data.map((t: any) => ({
+                        id: t.id,
+                        name: t.name,
+                        email: t.email,
+                        teacherId: t.teacher_id,
+                        subjects: t.subjects || [],
+                        classes: t.classes || [],
+                        phone: t.phone || '',
+                        address: t.address || '',
+                        img: t.img || `https://ui-avatars.com/api/?name=${encodeURIComponent(t.name)}&background=C3EBFA&color=1e293b&bold=true&size=128`,
+                    })));
+                } else {
+                    setTeachers(teachersData);
+                }
+            } catch (e) {
+                console.warn('Supabase not available, using local data.');
+                setTeachers(teachersData);
+            }
+        };
+        fetchTeachers();
+    }, []);
+
     const handleAddTeacher = async () => {
         if (!newTeacher.name || !newTeacher.email || !newTeacher.teacherId) return;
         setIsSubmitting(true);
 
-        const teacher: Teacher = {
-            id: Date.now(),
-            name: newTeacher.name,
-            email: newTeacher.email,
-            teacherId: newTeacher.teacherId,
-            subjects: newTeacher.subjects.split(',').map(s => s.trim()).filter(Boolean),
-            classes: newTeacher.classes.split(',').map(s => s.trim()).filter(Boolean),
-            phone: newTeacher.phone,
-            address: newTeacher.address,
-            img: `https://ui-avatars.com/api/?name=${encodeURIComponent(newTeacher.name)}&background=C3EBFA&color=1e293b&bold=true&size=128`,
-        };
+        const img = `https://ui-avatars.com/api/?name=${encodeURIComponent(newTeacher.name)}&background=C3EBFA&color=1e293b&bold=true&size=128`;
+        const subjects = newTeacher.subjects.split(',').map(s => s.trim()).filter(Boolean);
+        const classes = newTeacher.classes.split(',').map(s => s.trim()).filter(Boolean);
 
         try {
-            // Try to save to Supabase
             const { supabase } = await import('./supabaseClient');
-            const { error } = await supabase.from('teachers').insert([{
-                name: teacher.name,
-                email: teacher.email,
-                teacher_id: teacher.teacherId,
-                subjects: teacher.subjects,
-                classes: teacher.classes,
-                phone: teacher.phone,
-                address: teacher.address,
-                img: teacher.img,
-            }]);
+            const { data, error } = await supabase.from('teachers').insert([{
+                name: newTeacher.name,
+                email: newTeacher.email,
+                teacher_id: newTeacher.teacherId,
+                subjects,
+                classes,
+                phone: newTeacher.phone,
+                address: newTeacher.address,
+                img,
+            }]).select();
+
             if (error) {
-                console.warn('Supabase insert failed (table may not exist yet):', error.message);
+                alert('Failed to add teacher: ' + error.message);
+                setIsSubmitting(false);
+                return;
+            }
+
+            if (data && data[0]) {
+                const t = data[0];
+                const teacher: Teacher = {
+                    id: t.id,
+                    name: t.name,
+                    email: t.email,
+                    teacherId: t.teacher_id,
+                    subjects: t.subjects || [],
+                    classes: t.classes || [],
+                    phone: t.phone || '',
+                    address: t.address || '',
+                    img: t.img || img,
+                };
+                setTeachers(prev => [teacher, ...prev]);
             }
         } catch (e) {
-            console.warn('Supabase not available, saving locally only.');
+            alert('Could not connect to database. Please check your connection.');
+            setIsSubmitting(false);
+            return;
         }
 
-        setTeachers(prev => [teacher, ...prev]);
         setNewTeacher({ name: '', email: '', teacherId: '', subjects: '', classes: '', phone: '', address: '' });
         setShowAddModal(false);
         setIsSubmitting(false);
     };
 
-    const handleDeleteTeacher = (id: number) => {
+    const handleDeleteTeacher = async (id: number) => {
+        try {
+            const { supabase } = await import('./supabaseClient');
+            const { error } = await supabase.from('teachers').delete().eq('id', id);
+            if (error) {
+                console.warn('Failed to delete from Supabase:', error.message);
+            }
+        } catch (e) {
+            console.warn('Supabase not available for delete.');
+        }
         setTeachers(prev => prev.filter(t => t.id !== id));
     };
 
