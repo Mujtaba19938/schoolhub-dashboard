@@ -1038,15 +1038,177 @@ const ExpensesPage = () => {
 };
 
 const LibraryPage = () => {
+    const [books, setBooks] = useState<Book[]>(booksData);
+    const [editingBook, setEditingBook] = useState<Book | null>(null);
+    const [editForm, setEditForm] = useState({ id: '', title: '', writer: '', subject: '', class: '', publishDate: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [newBook, setNewBook] = useState({ id: '', title: '', writer: '', subject: '', class: '', publishDate: '' });
+
+    const handleAddBook = () => {
+        if (!newBook.title || !newBook.writer || !newBook.id) return;
+        setIsSubmitting(true);
+        const book: Book = {
+            id: newBook.id,
+            title: newBook.title,
+            writer: newBook.writer,
+            subject: newBook.subject,
+            class: newBook.class,
+            publishDate: newBook.publishDate,
+            img: `https://ui-avatars.com/api/?name=${encodeURIComponent(newBook.title)}&background=C3EBFA&color=1e293b&bold=true&size=128`,
+        };
+        setBooks(prev => [book, ...prev]);
+        setNewBook({ id: '', title: '', writer: '', subject: '', class: '', publishDate: '' });
+        setShowAddModal(false);
+        setIsSubmitting(false);
+    };
+
+    const openEditBookModal = (book: Book) => {
+        setEditingBook(book);
+        setEditForm({ id: book.id, title: book.title, writer: book.writer, subject: book.subject, class: book.class, publishDate: book.publishDate });
+    };
+
+    const handleEditBook = () => {
+        if (!editingBook || !editForm.title || !editForm.writer) return;
+        setIsSubmitting(true);
+        setBooks(prev => prev.map(b => b.id === editingBook.id ? {
+            ...b, id: editForm.id, title: editForm.title, writer: editForm.writer, subject: editForm.subject, class: editForm.class, publishDate: editForm.publishDate,
+        } : b));
+        setEditingBook(null);
+        setIsSubmitting(false);
+    };
+
+    const handleDeleteBook = (id: string) => {
+        setBooks(prev => prev.filter(b => b.id !== id));
+    };
+
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold text-slate-800">All Books</h1>
-                <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                    <Search size={16} className="text-gray-400" />
-                    <input type="text" placeholder="Search by Book Name or Writer" className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
+                        <Search size={16} className="text-gray-400" />
+                        <input type="text" placeholder="Search by Book Name or Writer" className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    </div>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors"
+                    >
+                        <Plus size={16} className="text-slate-800" />
+                    </button>
                 </div>
             </div>
+
+            {/* Add Book Modal */}
+            {showAddModal && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ animation: 'modalSlideIn 0.3s ease-out' }}>
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Add New Book</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">Fill in the book details below</p>
+                            </div>
+                            <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-6 flex flex-col gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Book Title <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. To Kill a Mockingbird" value={newBook.title} onChange={(e) => setNewBook({ ...newBook, title: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Writer <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. Harper Lee" value={newBook.writer} onChange={(e) => setNewBook({ ...newBook, writer: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Book ID <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. 2024-ENG-010-01" value={newBook.id} onChange={(e) => setNewBook({ ...newBook, id: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Subject</label>
+                                    <input type="text" placeholder="e.g. English Literature" value={newBook.subject} onChange={(e) => setNewBook({ ...newBook, subject: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Class</label>
+                                    <input type="text" placeholder="e.g. Class 10" value={newBook.class} onChange={(e) => setNewBook({ ...newBook, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Publish Date</label>
+                                    <input type="text" placeholder="e.g. 1960" value={newBook.publishDate} onChange={(e) => setNewBook({ ...newBook, publishDate: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                            <button onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                            <button onClick={handleAddBook} disabled={!newBook.title || !newBook.writer || !newBook.id || isSubmitting} className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
+                                {isSubmitting ? (<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>Adding...</>) : (<><Plus size={16} />Add Book</>)}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Edit Book Modal */}
+            {editingBook && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingBook(null)}>
+                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ animation: 'modalSlideIn 0.3s ease-out' }}>
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Edit Book</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">Update book details below</p>
+                            </div>
+                            <button onClick={() => setEditingBook(null)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={18} />
+                            </button>
+                        </div>
+                        <div className="p-6 flex flex-col gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Book Title <span className="text-red-400">*</span></label>
+                                    <input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Writer <span className="text-red-400">*</span></label>
+                                    <input type="text" value={editForm.writer} onChange={(e) => setEditForm({ ...editForm, writer: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Book ID</label>
+                                    <input type="text" value={editForm.id} onChange={(e) => setEditForm({ ...editForm, id: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Subject</label>
+                                    <input type="text" value={editForm.subject} onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Class</label>
+                                    <input type="text" value={editForm.class} onChange={(e) => setEditForm({ ...editForm, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Publish Date</label>
+                                    <input type="text" value={editForm.publishDate} onChange={(e) => setEditForm({ ...editForm, publishDate: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                </div>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                            <button onClick={() => setEditingBook(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                            <button onClick={handleEditBook} disabled={!editForm.title || !editForm.writer || isSubmitting} className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
+                                {isSubmitting ? (<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>Saving...</>) : (<><FilePenLine size={16} />Save Changes</>)}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
                 <div className="overflow-x-auto">
@@ -1054,7 +1216,15 @@ const LibraryPage = () => {
                         <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
-                                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500" />
+                                    <input
+                                        type="checkbox"
+                                        checked={books.length > 0 && books.every(b => b.selected)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setBooks(prev => prev.map(b => ({ ...b, selected: checked })));
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500 cursor-pointer"
+                                    />
                                 </th>
                                 <th className="p-4">Book ID</th>
                                 <th className="p-4">Book Name</th>
@@ -1066,10 +1236,13 @@ const LibraryPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {booksData.map((book) => (
+                            {books.map((book) => (
                                 <tr key={book.id} className={`group hover:bg-gray-50 transition-colors ${book.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
-                                        <div className={`w-4 h-4 rounded flex items-center justify-center border ${book.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}>
+                                        <div
+                                            onClick={() => setBooks(prev => prev.map(b => b.id === book.id ? { ...b, selected: !b.selected } : b))}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${book.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}
+                                        >
                                             {book.selected && <Check size={12} className="text-white" />}
                                         </div>
                                     </td>
@@ -1088,10 +1261,16 @@ const LibraryPage = () => {
                                     <td className="p-4 text-slate-600">{book.publishDate}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
-                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors">
+                                            <button
+                                                onClick={() => openEditBookModal(book)}
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors"
+                                            >
                                                 <FilePenLine size={14} />
                                             </button>
-                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
+                                            <button
+                                                onClick={() => handleDeleteBook(book.id)}
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors"
+                                            >
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
@@ -1142,11 +1321,18 @@ const LibraryPage = () => {
 
 const StudentsPage = () => {
     const [students, setStudents] = useState<Student[]>(studentsData);
+    const [currentPage, setCurrentPage] = useState(1);
     const [showAddModal, setShowAddModal] = useState(false);
     const [newStudent, setNewStudent] = useState({
         name: '', email: '', studentId: '', class: '', dob: '', phone: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+    const [editForm, setEditForm] = useState({ name: '', email: '', studentId: '', class: '', dob: '', phone: '' });
+
+    const ITEMS_PER_PAGE = 10;
+    const totalPages = Math.ceil(students.length / ITEMS_PER_PAGE);
+    const paginatedStudents = students.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     const handleAddStudent = async () => {
         if (!newStudent.name || !newStudent.email || !newStudent.studentId) return;
@@ -1187,6 +1373,55 @@ const StudentsPage = () => {
 
     const handleDeleteStudent = (id: number) => {
         setStudents(prev => prev.filter(s => s.id !== id));
+    };
+
+    const openEditStudentModal = (student: Student) => {
+        setEditingStudent(student);
+        setEditForm({
+            name: student.name,
+            email: student.email,
+            studentId: student.studentId,
+            class: student.class,
+            dob: student.dob,
+            phone: student.phone,
+        });
+    };
+
+    const handleEditStudent = async () => {
+        if (!editingStudent || !editForm.name || !editForm.email || !editForm.studentId) return;
+        setIsSubmitting(true);
+
+        try {
+            const { supabase } = await import('./supabaseClient');
+            const { error } = await supabase.from('students').update({
+                name: editForm.name,
+                email: editForm.email,
+                student_id: editForm.studentId,
+                class: editForm.class,
+                dob: editForm.dob || null,
+                phone: editForm.phone,
+            }).eq('id', editingStudent.id);
+
+            if (error) console.warn('Failed to update student in Supabase:', error.message);
+        } catch (e) {
+            console.warn('Supabase not available for update.');
+        }
+
+        setStudents(prev => prev.map(s => s.id === editingStudent.id ? {
+            ...s,
+            name: editForm.name,
+            email: editForm.email,
+            studentId: editForm.studentId,
+            class: editForm.class,
+            dob: editForm.dob,
+            phone: editForm.phone,
+            img: s.name !== editForm.name
+                ? `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.name)}&background=C3EBFA&color=1e293b&bold=true&size=128`
+                : s.img,
+        } : s));
+
+        setEditingStudent(null);
+        setIsSubmitting(false);
     };
 
     return (
@@ -1338,13 +1573,136 @@ const StudentsPage = () => {
                 </div>
             )}
 
+            {/* Edit Student Modal */}
+            {editingStudent && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingStudent(null)}>
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ animation: 'modalSlideIn 0.3s ease-out' }}
+                    >
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Edit Student</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">Update the student details below</p>
+                            </div>
+                            <button
+                                onClick={() => setEditingStudent(null)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 flex flex-col gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Full Name <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Email <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="email"
+                                        value={editForm.email}
+                                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Student ID <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={editForm.studentId}
+                                        onChange={(e) => setEditForm({ ...editForm, studentId: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Class</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.class}
+                                        onChange={(e) => setEditForm({ ...editForm, class: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Date of Birth</label>
+                                    <input
+                                        type="date"
+                                        value={editForm.dob}
+                                        onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Phone</label>
+                                    <input
+                                        type="tel"
+                                        value={editForm.phone}
+                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => setEditingStudent(null)}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditStudent}
+                                disabled={!editForm.name || !editForm.email || !editForm.studentId || isSubmitting}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FilePenLine size={16} />
+                                        Save Changes
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
                         <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
-                                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500" />
+                                    <input
+                                        type="checkbox"
+                                        checked={students.length > 0 && students.every(s => s.selected)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setStudents(prev => prev.map(s => ({ ...s, selected: checked })));
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500 cursor-pointer"
+                                    />
                                 </th>
                                 <th className="p-4">Student Name</th>
                                 <th className="p-4">Student ID</th>
@@ -1355,10 +1713,13 @@ const StudentsPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {students.map((student) => (
+                            {paginatedStudents.map((student) => (
                                 <tr key={student.id} className={`group hover:bg-gray-50 transition-colors ${student.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
-                                        <div className={`w-4 h-4 rounded flex items-center justify-center border ${student.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}>
+                                        <div
+                                            onClick={() => setStudents(prev => prev.map(s => s.id === student.id ? { ...s, selected: !s.selected } : s))}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${student.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}
+                                        >
                                             {student.selected && <Check size={12} className="text-white" />}
                                         </div>
                                     </td>
@@ -1383,7 +1744,10 @@ const StudentsPage = () => {
                                     <td className="p-4 text-slate-600 font-medium">{student.phone}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
-                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors">
+                                            <button
+                                                onClick={() => openEditStudentModal(student)}
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors"
+                                            >
                                                 <FilePenLine size={14} />
                                             </button>
                                             <button
@@ -1400,23 +1764,25 @@ const StudentsPage = () => {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex justify-center items-center mt-auto pt-6 gap-2">
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
-                        Previous
-                    </button>
-                    <div className="flex gap-2">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-lamaSky text-sky-600 font-bold text-xs">1</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">2</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">3</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">4</button>
-                        <span className="flex items-center text-gray-400 text-xs">...</span>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">12</button>
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center pt-6 gap-3">
+                        <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(p => p - 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
                     </div>
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
-                        Next
-                    </button>
-                </div>
+                )}
 
                 <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2">
@@ -1440,11 +1806,18 @@ const StudentsPage = () => {
 
 const TeachersPage = () => {
     const [teachers, setTeachers] = useState<Teacher[]>([]);
+    const [currentPage, setCurrentPage] = useState(1);
     const [showAddModal, setShowAddModal] = useState(false);
     const [newTeacher, setNewTeacher] = useState({
         name: '', email: '', teacherId: '', subjects: '', classes: '', phone: '', address: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
+    const [editForm, setEditForm] = useState({ name: '', email: '', teacherId: '', subjects: '', classes: '', phone: '', address: '' });
+
+    const ITEMS_PER_PAGE = 10;
+    const totalPages = Math.ceil(teachers.length / ITEMS_PER_PAGE);
+    const paginatedTeachers = teachers.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     // Fetch teachers from Supabase on mount
     useEffect(() => {
@@ -1549,6 +1922,63 @@ const TeachersPage = () => {
             console.warn('Supabase not available for delete.');
         }
         setTeachers(prev => prev.filter(t => t.id !== id));
+    };
+
+    const openEditModal = (teacher: Teacher) => {
+        setEditingTeacher(teacher);
+        setEditForm({
+            name: teacher.name,
+            email: teacher.email,
+            teacherId: teacher.teacherId,
+            subjects: teacher.subjects.join(', '),
+            classes: teacher.classes.join(', '),
+            phone: teacher.phone,
+            address: teacher.address,
+        });
+    };
+
+    const handleEditTeacher = async () => {
+        if (!editingTeacher || !editForm.name || !editForm.email || !editForm.teacherId) return;
+        setIsSubmitting(true);
+
+        const subjects = editForm.subjects.split(',').map(s => s.trim()).filter(Boolean);
+        const classes = editForm.classes.split(',').map(s => s.trim()).filter(Boolean);
+
+        try {
+            const { supabase } = await import('./supabaseClient');
+            const { error } = await supabase.from('teachers').update({
+                name: editForm.name,
+                email: editForm.email,
+                teacher_id: editForm.teacherId,
+                subjects,
+                classes,
+                phone: editForm.phone,
+                address: editForm.address,
+            }).eq('id', editingTeacher.id);
+
+            if (error) {
+                console.warn('Failed to update teacher in Supabase:', error.message);
+            }
+        } catch (e) {
+            console.warn('Supabase not available for update.');
+        }
+
+        setTeachers(prev => prev.map(t => t.id === editingTeacher.id ? {
+            ...t,
+            name: editForm.name,
+            email: editForm.email,
+            teacherId: editForm.teacherId,
+            subjects,
+            classes,
+            phone: editForm.phone,
+            address: editForm.address,
+            img: t.name !== editForm.name
+                ? `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.name)}&background=C3EBFA&color=1e293b&bold=true&size=128`
+                : t.img,
+        } : t));
+
+        setEditingTeacher(null);
+        setIsSubmitting(false);
     };
 
     return (
@@ -1715,13 +2145,148 @@ const TeachersPage = () => {
                 </div>
             )}
 
+            {/* Edit Teacher Modal */}
+            {editingTeacher && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingTeacher(null)}>
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ animation: 'modalSlideIn 0.3s ease-out' }}
+                    >
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Edit Teacher</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">Update the details below</p>
+                            </div>
+                            <button
+                                onClick={() => setEditingTeacher(null)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 flex flex-col gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Full Name <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Email <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="email"
+                                        value={editForm.email}
+                                        onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Teacher ID <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={editForm.teacherId}
+                                        onChange={(e) => setEditForm({ ...editForm, teacherId: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Phone</label>
+                                    <input
+                                        type="tel"
+                                        value={editForm.phone}
+                                        onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Subjects</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.subjects}
+                                        onChange={(e) => setEditForm({ ...editForm, subjects: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Classes</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.classes}
+                                        onChange={(e) => setEditForm({ ...editForm, classes: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-slate-600">Address</label>
+                                <input
+                                    type="text"
+                                    value={editForm.address}
+                                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => setEditingTeacher(null)}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleEditTeacher}
+                                disabled={!editForm.name || !editForm.email || !editForm.teacherId || isSubmitting}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        Saving...
+                                    </>
+                                ) : (
+                                    <>
+                                        <FilePenLine size={16} />
+                                        Save Changes
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
                         <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
-                                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500" />
+                                    <input
+                                        type="checkbox"
+                                        checked={teachers.length > 0 && teachers.every(t => t.selected)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setTeachers(prev => prev.map(t => ({ ...t, selected: checked })));
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500 cursor-pointer"
+                                    />
                                 </th>
                                 <th className="p-4">Teacher Name</th>
                                 <th className="p-4">Teacher ID</th>
@@ -1733,10 +2298,13 @@ const TeachersPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {teachers.map((teacher) => (
+                            {paginatedTeachers.map((teacher) => (
                                 <tr key={teacher.id} className={`group hover:bg-gray-50 transition-colors ${teacher.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
-                                        <div className={`w-4 h-4 rounded flex items-center justify-center border ${teacher.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}>
+                                        <div
+                                            onClick={() => setTeachers(prev => prev.map(t => t.id === teacher.id ? { ...t, selected: !t.selected } : t))}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${teacher.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}
+                                        >
                                             {teacher.selected && <Check size={12} className="text-white" />}
                                         </div>
                                     </td>
@@ -1774,7 +2342,10 @@ const TeachersPage = () => {
                                     <td className="p-4 text-slate-600 text-xs max-w-[150px] truncate" title={teacher.address}>{teacher.address}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
-                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors">
+                                            <button
+                                                onClick={() => openEditModal(teacher)}
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors"
+                                            >
                                                 <FilePenLine size={14} />
                                             </button>
                                             <button
@@ -1791,23 +2362,25 @@ const TeachersPage = () => {
                     </table>
                 </div>
 
-                {/* Pagination */}
-                <div className="flex justify-center items-center mt-auto pt-6 gap-2">
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
-                        Previous
-                    </button>
-                    <div className="flex gap-2">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-lamaSky text-sky-600 font-bold text-xs">1</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">2</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">3</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">4</button>
-                        <span className="flex items-center text-gray-400 text-xs">...</span>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">12</button>
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center pt-6 gap-3">
+                        <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(p => p - 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
                     </div>
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
-                        Next
-                    </button>
-                </div>
+                )}
 
                 <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2">
@@ -1829,36 +2402,157 @@ const TeachersPage = () => {
     );
 };
 
+const eventCategories = [
+    { label: 'Big Day / Celebration', color: 'text-purple-600', bgColor: 'bg-lamaPurpleLight' },
+    { label: 'Subject / Exam', color: 'text-pink-600', bgColor: 'bg-pink-100' },
+    { label: 'Fair / Exhibition', color: 'text-sky-600', bgColor: 'bg-lamaSkyLight' },
+    { label: 'Official Meeting', color: 'text-yellow-600', bgColor: 'bg-lamaYellowLight' },
+];
+
 const CalendarPage = () => {
-    // Generate dates for May 2030 (Static for demo)
-    // May 1 2030 is Wednesday.
-    const dates = [];
-
-    // Add empty slots for Mon, Tue
-    dates.push({ day: null }); // Sun (Not showing in screenshot, but usually calendars have Sun)
-    dates.push({ day: null }); // Mon
-    dates.push({ day: null }); // Tue
-
-    // Add days 1-31
-    for (let i = 1; i <= 31; i++) {
-        dates.push({ day: i });
-    }
-
-    // Add remaining empty slots to fill the grid (7 columns)
-    const totalCells = Math.ceil(dates.length / 7) * 7;
-    for (let i = dates.length; i < totalCells; i++) {
-        dates.push({ day: null });
-    }
+    const [events, setEvents] = useState(calendarEvents.map(e => ({ ...e })));
+    const [showModal, setShowModal] = useState(false);
+    const [editingEvent, setEditingEvent] = useState<{ id: number; title: string; date: number; color: string; bgColor: string } | null>(null);
+    const [eventForm, setEventForm] = useState({ title: '', date: '', category: '0' });
 
     const weekDays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
+    const openAddModal = (day?: number) => {
+        setEditingEvent(null);
+        setEventForm({ title: '', date: day ? String(day) : '', category: '0' });
+        setShowModal(true);
+    };
+
+    const openEditModal = (event: typeof events[0]) => {
+        setEditingEvent(event);
+        const catIdx = eventCategories.findIndex(c => c.color === event.color && c.bgColor === event.bgColor);
+        setEventForm({ title: event.title, date: String(event.date), category: String(catIdx >= 0 ? catIdx : 0) });
+        setShowModal(true);
+    };
+
+    const handleSaveEvent = () => {
+        if (!eventForm.title || !eventForm.date) return;
+        const cat = eventCategories[parseInt(eventForm.category)];
+        if (editingEvent) {
+            setEvents(prev => prev.map(e => e.id === editingEvent.id ? {
+                ...e, title: eventForm.title, date: parseInt(eventForm.date), color: cat.color, bgColor: cat.bgColor,
+            } : e));
+        } else {
+            setEvents(prev => [...prev, {
+                id: Date.now(), title: eventForm.title, date: parseInt(eventForm.date), color: cat.color, bgColor: cat.bgColor,
+            }]);
+        }
+        setShowModal(false);
+        setEditingEvent(null);
+    };
+
+    const handleDeleteEvent = (id: number) => {
+        setEvents(prev => prev.filter(e => e.id !== id));
+        setShowModal(false);
+        setEditingEvent(null);
+    };
+
     return (
         <div className="p-6 h-full flex flex-col md:flex-row gap-6">
+            {/* Event Modal */}
+            {showModal && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-md"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ animation: 'modalSlideIn 0.3s ease-out' }}
+                    >
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">{editingEvent ? 'Edit Event' : 'Add Event'}</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">{editingEvent ? 'Update event details' : 'Create a new calendar event'}</p>
+                            </div>
+                            <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 flex flex-col gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-slate-600">Event Title <span className="text-red-400">*</span></label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Science Fair"
+                                    value={eventForm.title}
+                                    onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Day (1-31) <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="number"
+                                        min={1}
+                                        max={31}
+                                        placeholder="e.g. 15"
+                                        value={eventForm.date}
+                                        onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Category</label>
+                                    <select
+                                        value={eventForm.category}
+                                        onChange={(e) => setEventForm({ ...eventForm, category: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    >
+                                        {eventCategories.map((cat, i) => (
+                                            <option key={i} value={i}>{cat.label}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-between p-6 pt-4 border-t border-gray-100">
+                            <div>
+                                {editingEvent && (
+                                    <button
+                                        onClick={() => handleDeleteEvent(editingEvent.id)}
+                                        className="px-4 py-2.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-colors flex items-center gap-2"
+                                    >
+                                        <Trash2 size={14} />
+                                        Delete
+                                    </button>
+                                )}
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <button onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveEvent}
+                                    disabled={!eventForm.title || !eventForm.date}
+                                    className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                                >
+                                    <Plus size={16} />
+                                    {editingEvent ? 'Save Changes' : 'Add Event'}
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Left: Calendar View */}
             <div className="w-full md:w-3/4 flex flex-col h-full bg-white rounded-3xl p-6 shadow-sm overflow-hidden">
                 <div className="flex justify-between items-center mb-8">
                     <h1 className="text-xl font-bold text-slate-800">May 2030</h1>
                     <div className="flex items-center gap-4">
+                        <button
+                            onClick={() => openAddModal()}
+                            className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-400 text-white rounded-lg text-xs font-semibold hover:bg-sky-500 transition-colors"
+                        >
+                            <Plus size={14} />
+                            Add Event
+                        </button>
                         <span className="text-xs font-semibold text-gray-400">Today</span>
                         <div className="flex gap-1">
                             <div className="p-1 rounded-md bg-purple-100 text-purple-600 cursor-pointer hover:bg-purple-200">
@@ -1883,33 +2577,36 @@ const CalendarPage = () => {
 
                     {/* Grid */}
                     <div className="grid grid-cols-7 flex-1 auto-rows-fr gap-4">
-                        {/* We need to correct the offset for May 1st 2030 (Wednesday) */}
-                        {/* 0: Sun, 1: Mon, 2: Tue, 3: Wed ... */}
-                        {/* Empty slots for Sun, Mon, Tue */}
                         {[...Array(3)].map((_, i) => (
                             <div key={`empty-${i}`} className="h-full min-h-[100px] border-t border-gray-100 p-2"></div>
                         ))}
 
                         {[...Array(31)].map((_, i) => {
                             const day = i + 1;
-                            const dayEvents = calendarEvents.filter(e => e.date === day);
+                            const dayEvents = events.filter(e => e.date === day);
                             return (
                                 <div key={day} className="h-full min-h-[100px] border-t border-gray-100 p-2 flex flex-col gap-1 relative group hover:bg-gray-50 transition-colors">
                                     <span className="text-xs font-semibold text-gray-500 mb-1 block">{day.toString().padStart(2, '0')}</span>
                                     {dayEvents.map(event => (
-                                        <div key={event.id} className={`text-[10px] px-2 py-1 rounded-md truncate font-medium ${event.bgColor} ${event.color} cursor-pointer hover:opacity-80`}>
+                                        <div
+                                            key={event.id}
+                                            onClick={() => openEditModal(event)}
+                                            className={`text-[10px] px-2 py-1 rounded-md truncate font-medium ${event.bgColor} ${event.color} cursor-pointer hover:opacity-80`}
+                                        >
                                             {event.title}
                                         </div>
                                     ))}
                                     {/* Add button on hover */}
-                                    <button className="hidden group-hover:flex absolute top-2 right-2 w-5 h-5 bg-purple-100 rounded-full items-center justify-center text-purple-600">
+                                    <button
+                                        onClick={() => openAddModal(day)}
+                                        className="hidden group-hover:flex absolute top-2 right-2 w-5 h-5 bg-purple-100 rounded-full items-center justify-center text-purple-600 hover:bg-purple-200"
+                                    >
                                         <Plus size={12} />
                                     </button>
                                 </div>
                             )
                         })}
 
-                        {/* Remaining empty slots */}
                         {[...Array(1)].map((_, i) => (
                             <div key={`empty-end-${i}`} className="h-full min-h-[100px] border-t border-gray-100 p-2"></div>
                         ))}
@@ -1956,7 +2653,6 @@ const CalendarPage = () => {
                                 </div>
                                 <span className="text-[10px] text-gray-400 block mb-2">{item.group}</span>
 
-                                {/* Card preview if needed, simplifying to colored block for now to match style */}
                                 <div className={`h-1 w-12 rounded-full ${item.bg.replace('light', '').replace('bg-', 'bg-').replace('100', '400')}`}></div>
                             </div>
                         ))}
@@ -1969,7 +2665,17 @@ const CalendarPage = () => {
 
 const MessagesPage = () => {
     return (
-        <div className="p-6 h-full">
+        <div className="p-6 h-full relative">
+            {/* Coming Soon Overlay */}
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-3xl m-6">
+                <div className="text-center">
+                    <div className="w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center mx-auto mb-4">
+                        <MessageCircle size={28} className="text-sky-500" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-slate-800 mb-2">Coming Soon</h2>
+                    <p className="text-sm text-gray-500 max-w-xs">The messaging feature is currently under development. Stay tuned!</p>
+                </div>
+            </div>
             <div className="bg-white rounded-3xl h-full shadow-sm flex overflow-hidden">
                 {/* Left: Message List */}
                 <div className="w-full md:w-1/3 border-r border-gray-100 flex flex-col">
@@ -2097,19 +2803,226 @@ const MessagesPage = () => {
 };
 
 const NoticePage = () => {
+    const [notices, setNotices] = useState(noticesList);
+    const [showAddModal, setShowAddModal] = useState(false);
+    const [newNotice, setNewNotice] = useState({ title: '', author: '', desc: '', tags: '' });
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [selectedNotice, setSelectedNotice] = useState<typeof noticesList[0] | null>(null);
+
+    const handleAddNotice = () => {
+        if (!newNotice.title || !newNotice.author || !newNotice.desc) return;
+        setIsSubmitting(true);
+        const tags = newNotice.tags.split(',').map(t => t.trim()).filter(Boolean);
+        const notice = {
+            id: Date.now(),
+            title: newNotice.title,
+            author: newNotice.author,
+            date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+            views: '0',
+            desc: newNotice.desc,
+            tags,
+            img: `https://ui-avatars.com/api/?name=${encodeURIComponent(newNotice.title)}&background=C3EBFA&color=1e293b&bold=true&size=256`,
+            bg: 'bg-white',
+            avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(newNotice.author)}&background=CFCEFF&color=1e293b&bold=true&size=128`,
+        };
+        setNotices(prev => [notice, ...prev]);
+        setNewNotice({ title: '', author: '', desc: '', tags: '' });
+        setShowAddModal(false);
+        setIsSubmitting(false);
+    };
+
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-bold text-slate-800">School Notices</h1>
-                <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                    <Search size={16} className="text-gray-400" />
-                    <input type="text" placeholder="Search notices..." className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
+                        <Search size={16} className="text-gray-400" />
+                        <input type="text" placeholder="Search notices..." className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    </div>
+                    <button
+                        onClick={() => setShowAddModal(true)}
+                        className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors"
+                    >
+                        <Plus size={16} className="text-slate-800" />
+                    </button>
                 </div>
             </div>
 
+            {/* Add Notice Modal */}
+            {showAddModal && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ animation: 'modalSlideIn 0.3s ease-out' }}
+                    >
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Add New Notice</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">Fill in the notice details below</p>
+                            </div>
+                            <button
+                                onClick={() => setShowAddModal(false)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 flex flex-col gap-4">
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-slate-600">Title <span className="text-red-400">*</span></label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. School Event Announcement"
+                                    value={newNotice.title}
+                                    onChange={(e) => setNewNotice({ ...newNotice, title: e.target.value })}
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                />
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Author <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. Principal Linda Carter"
+                                        value={newNotice.author}
+                                        onChange={(e) => setNewNotice({ ...newNotice, author: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Tags</label>
+                                    <input
+                                        type="text"
+                                        placeholder="e.g. School, Event, Important"
+                                        value={newNotice.tags}
+                                        onChange={(e) => setNewNotice({ ...newNotice, tags: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                </div>
+                            </div>
+                            <div className="flex flex-col gap-1.5">
+                                <label className="text-xs font-semibold text-slate-600">Description <span className="text-red-400">*</span></label>
+                                <textarea
+                                    placeholder="Write the notice content here..."
+                                    value={newNotice.desc}
+                                    onChange={(e) => setNewNotice({ ...newNotice, desc: e.target.value })}
+                                    rows={4}
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all resize-none"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => setShowAddModal(false)}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleAddNotice}
+                                disabled={!newNotice.title || !newNotice.author || !newNotice.desc || isSubmitting}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                            >
+                                {isSubmitting ? (
+                                    <>
+                                        <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                        Publishing...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Plus size={16} />
+                                        Publish Notice
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Read More Modal */}
+            {selectedNotice && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedNotice(null)}>
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ animation: 'modalSlideIn 0.3s ease-out' }}
+                    >
+                        {/* Notice Image */}
+                        {selectedNotice.img && (
+                            <div className="w-full h-56 rounded-t-3xl overflow-hidden">
+                                <img src={selectedNotice.img} alt={selectedNotice.title} className="w-full h-full object-cover" />
+                            </div>
+                        )}
+
+                        {/* Header */}
+                        <div className="flex items-start justify-between p-6 pb-3">
+                            <div className="flex-1">
+                                <h2 className="text-xl font-bold text-slate-800 mb-2">{selectedNotice.title}</h2>
+                                <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap">
+                                    <div className="flex items-center gap-1.5">
+                                        <div className="w-6 h-6 rounded-full overflow-hidden">
+                                            <img src={selectedNotice.avatar} alt="" className="w-full h-full object-cover" />
+                                        </div>
+                                        <span className="font-medium text-slate-600">{selectedNotice.author}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <CalendarDays size={14} />
+                                        <span>{selectedNotice.date}</span>
+                                    </div>
+                                    <div className="flex items-center gap-1">
+                                        <Eye size={14} />
+                                        <span>{selectedNotice.views} views</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setSelectedNotice(null)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0 ml-4"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        {/* Tags */}
+                        {selectedNotice.tags && selectedNotice.tags.length > 0 && (
+                            <div className="px-6 pb-3 flex gap-2 flex-wrap">
+                                {selectedNotice.tags.map(tag => (
+                                    <span key={tag} className="text-[10px] px-2.5 py-1 rounded-full bg-sky-50 text-sky-600 font-semibold">
+                                        {tag}
+                                    </span>
+                                ))}
+                            </div>
+                        )}
+
+                        {/* Content */}
+                        <div className="px-6 pb-6">
+                            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                                {(selectedNotice as any).content || selectedNotice.desc}
+                            </div>
+                        </div>
+
+                        {/* Footer */}
+                        <div className="flex items-center justify-end p-6 pt-4 border-t border-gray-100">
+                            <button
+                                onClick={() => setSelectedNotice(null)}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 transition-colors"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 overflow-y-auto custom-scrollbar">
                 <div className="flex flex-col gap-6">
-                    {noticesList.map((notice) => (
+                    {notices.map((notice) => (
                         <div key={notice.id} className={`p-6 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow ${notice.selected ? 'bg-lamaPurpleLight/20' : 'bg-white'}`}>
                             {/* Image */}
                             <div className="w-full md:w-48 h-48 rounded-xl overflow-hidden shrink-0">
@@ -2150,7 +3063,7 @@ const NoticePage = () => {
                                 </p>
 
                                 <div className="mt-auto flex items-center justify-between">
-                                    <button className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
+                                    <button onClick={() => setSelectedNotice(notice)} className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1">
                                         Read More <ChevronRight size={14} />
                                     </button>
 
@@ -2335,6 +3248,24 @@ const FinancePage = () => {
 
 const AttendancePage = () => {
     const days = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
+    const [attendance, setAttendance] = useState(() =>
+        attendanceTableData.map(s => ({ ...s, attendance: { ...s.attendance } }))
+    );
+    const [currentPage, setCurrentPage] = useState(1);
+
+    const ITEMS_PER_PAGE = 10;
+    const totalPages = Math.ceil(attendance.length / ITEMS_PER_PAGE);
+    const paginatedAttendance = attendance.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+
+    const toggleAttendance = (studentId: number, day: number) => {
+        setAttendance(prev => prev.map(s => {
+            if (s.id !== studentId) return s;
+            const current = s.attendance[day as keyof typeof s.attendance];
+            // Cycle: null -> true -> false -> 'leave' -> null
+            const next = current === null ? true : current === true ? false : current === false ? 'leave' : null;
+            return { ...s, attendance: { ...s.attendance, [day]: next } };
+        }));
+    };
 
     return (
         <div className="p-6 flex flex-col gap-6 h-full">
@@ -2371,26 +3302,36 @@ const AttendancePage = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {attendanceTableData.map(student => (
+                            {paginatedAttendance.map(student => (
                                 <tr key={student.id} className="hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-none group">
                                     <td className="p-4 text-sm font-semibold text-slate-700">{student.name}</td>
                                     {days.map(d => {
                                         const status = student.attendance[d as keyof typeof student.attendance];
                                         return (
                                             <td key={d} className="p-4 text-center">
-                                                <div className="flex items-center justify-center h-full">
+                                                <div
+                                                    className="flex items-center justify-center h-full cursor-pointer"
+                                                    onClick={() => toggleAttendance(student.id, d)}
+                                                >
                                                     {status === true && (
-                                                        <div className="w-6 h-6 rounded-full bg-sky-400 flex items-center justify-center text-white shadow-sm">
+                                                        <div className="w-6 h-6 rounded-full bg-sky-400 flex items-center justify-center text-white shadow-sm hover:bg-sky-500 transition-colors">
                                                             <Check size={12} strokeWidth={3} />
                                                         </div>
                                                     )}
                                                     {status === false && (
-                                                        <div className="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center text-white shadow-sm">
+                                                        <div className="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center text-white shadow-sm hover:bg-red-500 transition-colors">
                                                             <X size={12} strokeWidth={3} />
                                                         </div>
                                                     )}
+                                                    {status === 'leave' && (
+                                                        <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-white shadow-sm hover:bg-yellow-500 transition-colors">
+                                                            <span className="text-white text-xs font-bold">-</span>
+                                                        </div>
+                                                    )}
                                                     {status === null && (
-                                                        <span className="text-gray-300">-</span>
+                                                        <div className="w-6 h-6 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-sky-400 hover:bg-sky-50 transition-colors">
+                                                            <span className="text-gray-300 text-xs">-</span>
+                                                        </div>
                                                     )}
                                                 </div>
                                             </td>
@@ -2402,25 +3343,25 @@ const AttendancePage = () => {
                     </table>
                 </div>
 
-                {/* Footer / Pagination */}
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-6 pt-6 border-t border-gray-100 gap-4">
-                    <button className="px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
-                        Previous
-                    </button>
-
-                    <div className="flex gap-2 text-xs font-medium text-gray-500">
-                        <span className="w-6 h-6 flex items-center justify-center bg-sky-400 text-white rounded-full">1</span>
-                        <span className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer">2</span>
-                        <span className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer">3</span>
-                        <span className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer">4</span>
-                        <span className="flex items-center justify-center">...</span>
-                        <span className="w-6 h-6 flex items-center justify-center hover:bg-gray-100 rounded-full cursor-pointer">17</span>
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center pt-6 gap-3">
+                        <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(p => p - 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
                     </div>
-
-                    <button className="px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
-                        Next
-                    </button>
-                </div>
+                )}
 
                 <div className="mt-8 flex gap-6 text-xs text-gray-400 pt-2">
                     <div className="flex items-center gap-2">
@@ -2495,11 +3436,18 @@ const DashboardPage = () => {
 
 const CoursesPage = () => {
     const [courses, setCourses] = useState<Course[]>(coursesData);
+    const [currentPage, setCurrentPage] = useState(1);
     const [showAddModal, setShowAddModal] = useState(false);
     const [newCourse, setNewCourse] = useState({
         name: '', code: '', teacher: '', class: '', schedule: '', duration: '', students: ''
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+    const [editForm, setEditForm] = useState({ name: '', code: '', teacher: '', class: '', schedule: '', duration: '', students: '' });
+
+    const ITEMS_PER_PAGE = 10;
+    const totalPages = Math.ceil(courses.length / ITEMS_PER_PAGE);
+    const paginatedCourses = courses.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
     const handleAddCourse = async () => {
         if (!newCourse.name || !newCourse.code) return;
@@ -2544,6 +3492,58 @@ const CoursesPage = () => {
 
     const handleDeleteCourse = (id: number) => {
         setCourses(prev => prev.filter(c => c.id !== id));
+    };
+
+    const openEditCourseModal = (course: Course) => {
+        setEditingCourse(course);
+        setEditForm({
+            name: course.name,
+            code: course.code,
+            teacher: course.teacher,
+            class: course.class,
+            schedule: course.schedule,
+            duration: course.duration,
+            students: String(course.students),
+        });
+    };
+
+    const handleEditCourse = async () => {
+        if (!editingCourse || !editForm.name || !editForm.code) return;
+        setIsSubmitting(true);
+
+        try {
+            const { supabase } = await import('./supabaseClient');
+            const { error } = await supabase.from('courses').update({
+                name: editForm.name,
+                code: editForm.code,
+                teacher: editForm.teacher,
+                class: editForm.class,
+                schedule: editForm.schedule,
+                duration: editForm.duration,
+                students: parseInt(editForm.students) || 0,
+            }).eq('id', editingCourse.id);
+
+            if (error) console.warn('Failed to update course in Supabase:', error.message);
+        } catch (e) {
+            console.warn('Supabase not available for update.');
+        }
+
+        setCourses(prev => prev.map(c => c.id === editingCourse.id ? {
+            ...c,
+            name: editForm.name,
+            code: editForm.code,
+            teacher: editForm.teacher,
+            class: editForm.class,
+            schedule: editForm.schedule,
+            duration: editForm.duration,
+            students: parseInt(editForm.students) || 0,
+            img: c.name !== editForm.name
+                ? `https://ui-avatars.com/api/?name=${encodeURIComponent(editForm.code)}&background=CFCEFF&color=1e293b&bold=true&size=128`
+                : c.img,
+        } : c));
+
+        setEditingCourse(null);
+        setIsSubmitting(false);
     };
 
     return (
@@ -2640,13 +3640,132 @@ const CoursesPage = () => {
                 </div>
             )}
 
+            {/* Edit Course Modal */}
+            {editingCourse && (
+                <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingCourse(null)}>
+                    <div
+                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        onClick={(e) => e.stopPropagation()}
+                        style={{ animation: 'modalSlideIn 0.3s ease-out' }}
+                    >
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                            <div>
+                                <h2 className="text-lg font-bold text-slate-800">Edit Course</h2>
+                                <p className="text-xs text-gray-400 mt-0.5">Update the course details below</p>
+                            </div>
+                            <button
+                                onClick={() => setEditingCourse(null)}
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                            >
+                                <X size={18} />
+                            </button>
+                        </div>
+
+                        <div className="p-6 flex flex-col gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Course Name <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={editForm.name}
+                                        onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Course Code <span className="text-red-400">*</span></label>
+                                    <input
+                                        type="text"
+                                        value={editForm.code}
+                                        onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Teacher</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.teacher}
+                                        onChange={(e) => setEditForm({ ...editForm, teacher: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Class</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.class}
+                                        onChange={(e) => setEditForm({ ...editForm, class: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Schedule</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.schedule}
+                                        onChange={(e) => setEditForm({ ...editForm, schedule: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Duration</label>
+                                    <input
+                                        type="text"
+                                        value={editForm.duration}
+                                        onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600">Max Students</label>
+                                    <input
+                                        type="number"
+                                        value={editForm.students}
+                                        onChange={(e) => setEditForm({ ...editForm, students: e.target.value })}
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                            <button onClick={() => setEditingCourse(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                            <button
+                                onClick={handleEditCourse}
+                                disabled={!editForm.name || !editForm.code || isSubmitting}
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2"
+                            >
+                                {isSubmitting ? (
+                                    <><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>Saving...</>
+                                ) : (
+                                    <><Check size={16} />Save Changes</>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm text-gray-500">
                         <thead className="bg-lamaPurpleLight text-slate-700 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
-                                    <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500" />
+                                    <input
+                                        type="checkbox"
+                                        checked={courses.length > 0 && courses.every(c => c.selected)}
+                                        onChange={(e) => {
+                                            const checked = e.target.checked;
+                                            setCourses(prev => prev.map(c => ({ ...c, selected: checked })));
+                                        }}
+                                        className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500 cursor-pointer"
+                                    />
                                 </th>
                                 <th className="p-4">Course Name</th>
                                 <th className="p-4">Code</th>
@@ -2660,10 +3779,13 @@ const CoursesPage = () => {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-50">
-                            {courses.map((course) => (
+                            {paginatedCourses.map((course) => (
                                 <tr key={course.id} className={`group hover:bg-gray-50 transition-colors ${course.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
-                                        <div className={`w-4 h-4 rounded flex items-center justify-center border ${course.selected ? 'bg-purple-400 border-purple-400' : 'border-gray-300'}`}>
+                                        <div
+                                            onClick={() => setCourses(prev => prev.map(c => c.id === course.id ? { ...c, selected: !c.selected } : c))}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${course.selected ? 'bg-purple-400 border-purple-400' : 'border-gray-300'}`}
+                                        >
                                             {course.selected && <Check size={12} className="text-white" />}
                                         </div>
                                     </td>
@@ -2695,7 +3817,7 @@ const CoursesPage = () => {
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
-                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors">
+                                            <button onClick={() => openEditCourseModal(course)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors">
                                                 <FilePenLine size={14} />
                                             </button>
                                             <button onClick={() => handleDeleteCourse(course.id)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
@@ -2709,14 +3831,25 @@ const CoursesPage = () => {
                     </table>
                 </div>
 
-                <div className="flex justify-center items-center mt-auto pt-6 gap-2">
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">Previous</button>
-                    <div className="flex gap-2">
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-lamaPurple text-purple-600 font-bold text-xs">1</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">2</button>
+                {totalPages > 1 && (
+                    <div className="flex justify-center items-center pt-6 gap-3">
+                        <button
+                            disabled={currentPage === 1}
+                            onClick={() => setCurrentPage(p => p - 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Previous
+                        </button>
+                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <button
+                            disabled={currentPage === totalPages}
+                            onClick={() => setCurrentPage(p => p + 1)}
+                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                            Next
+                        </button>
                     </div>
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">Next</button>
-                </div>
+                )}
 
                 <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2"><Mail size={14} /><span>emailaddress@mail.com</span></div>
@@ -2733,7 +3866,7 @@ const CoursesPage = () => {
 };
 
 const App = () => {
-    const [activePage, setActivePage] = useState('teachers');
+    const [activePage, setActivePage] = useState('dashboard');
 
     return (
         <div className="flex min-h-screen">
