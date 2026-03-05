@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -11,8 +11,40 @@ import {
     Briefcase, CheckSquare, ClipboardList, ChevronLeft, ChevronRight,
     Trophy, Target, Eye, Sliders, CircleDollarSign, FileText, MessageCircle, UserCircle, Hexagon,
     Download, Phone, Mail, Check, X, Filter, Plus, Paperclip, Send, Video, MoreVertical, Image as ImageIcon, Mic,
-    FilePenLine, Trash2
+    FilePenLine, Trash2, Sun, Moon
 } from 'lucide-react';
+
+// --- Dark Mode Hook ---
+const useDarkMode = () => {
+    const [isDark, setIsDark] = useState(() => {
+        if (typeof window === 'undefined') return false;
+        return document.documentElement.classList.contains('dark');
+    });
+    const toggleDarkMode = () => {
+        const newValue = !isDark;
+        setIsDark(newValue);
+        if (newValue) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('schoolhub-theme', 'dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('schoolhub-theme', 'light');
+        }
+    };
+    return { isDark, toggleDarkMode };
+};
+
+// --- Dark BG Helper ---
+const withDarkBg = (lightBg: string) => {
+    const map: Record<string, string> = {
+        'bg-lamaSkyLight': 'bg-lamaSkyLight dark:bg-lamaSkyLightDark',
+        'bg-lamaPurpleLight': 'bg-lamaPurpleLight dark:bg-lamaPurpleLightDark',
+        'bg-lamaYellowLight': 'bg-lamaYellowLight dark:bg-lamaYellowLightDark',
+        'bg-white': 'bg-white dark:bg-slate-800',
+        'bg-pink-100': 'bg-pink-100 dark:bg-pink-900/30',
+    };
+    return map[lightBg] || lightBg;
+};
 
 // --- Types ---
 type AgendaItem = {
@@ -438,7 +470,7 @@ const activeChatMessages = [
     { id: 1, sender: "Mr. Franklin", text: "Good morning everyone! Just a reminder about the staff meeting at 2 PM. Please bring your calendars.", time: "10:00 AM", isMe: false, color: "text-blue-500", avatar: "https://images.pexels.com/photos/1222271/pexels-photo-1222271.jpeg?auto=compress&cs=tinysrgb&w=1200" },
     { id: 2, sender: "Mrs. Thomas", text: "Thanks for the reminder! Is there a specific agenda for today? I have a parent meeting at 3.", time: "10:05 AM", isMe: false, color: "text-pink-500", avatar: "https://images.pexels.com/photos/733872/pexels-photo-733872.jpeg?auto=compress&cs=tinysrgb&w=1200" },
     { id: 3, sender: "Mr. Harris", text: "Can someone send the updated curriculum files? I seem to have misplaced the email attachment.", time: "10:15 AM", isMe: false, color: "text-green-500", avatar: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1200" },
-    { id: 4, sender: "Linda", text: "Harris, I just forwarded it to you. Let me know if you get it.", time: "10:20 AM", isMe: true, color: "text-slate-700", avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1200" },
+    { id: 4, sender: "Linda", text: "Harris, I just forwarded it to you. Let me know if you get it.", time: "10:20 AM", isMe: true, color: "text-slate-700 dark:text-slate-200", avatar: "https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1200" },
     { id: 5, sender: "Ms. Patel", text: "All staff performance reviews are due by the end of this month. Please submit your report as soon as possible. Thanks!", time: "11:30 AM", isMe: false, color: "text-orange-500", avatar: "https://images.pexels.com/photos/5905710/pexels-photo-5905710.jpeg?auto=compress&cs=tinysrgb&w=1200" },
 ];
 
@@ -514,24 +546,24 @@ const UserCard = ({ type, count, date, bg }: { type: string, count: string, date
     return (
         <div className={`rounded-2xl odd:bg-lamaPurple even:bg-lamaYellow p-4 flex-1 min-w-[130px] ${bg}`}>
             <div className="flex justify-between items-center">
-                <span className="text-[10px] bg-white px-2 py-1 rounded-full text-green-600">
+                <span className="text-[10px] bg-white dark:bg-slate-800 px-2 py-1 rounded-full text-green-600">
                     {date}
                 </span>
                 <MoreHorizontal size={20} className="text-white cursor-pointer" />
             </div>
             <h1 className="text-2xl font-semibold my-4">{count}</h1>
-            <h2 className="capitalize text-sm font-medium text-gray-500">{type}s</h2>
+            <h2 className="capitalize text-sm font-medium text-gray-500 dark:text-slate-400">{type}s</h2>
         </div>
     );
 };
 
 const CountChart = () => {
     return (
-        <div className="bg-white rounded-xl w-full h-full p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl w-full h-full p-4">
             {/* Title */}
             <div className="flex justify-between items-center">
                 <h1 className="text-lg font-semibold">Students</h1>
-                <MoreHorizontal size={20} className="cursor-pointer text-gray-400" />
+                <MoreHorizontal size={20} className="cursor-pointer text-gray-400 dark:text-slate-500" />
             </div>
             {/* Chart */}
             <div className="relative w-full h-[75%]">
@@ -552,12 +584,12 @@ const CountChart = () => {
                 <div className="flex flex-col gap-1">
                     <div className="w-5 h-5 bg-lamaSky rounded-full" />
                     <h1 className="font-bold">1,234</h1>
-                    <h2 className="text-xs text-gray-300">Boys (55%)</h2>
+                    <h2 className="text-xs text-gray-300 dark:text-slate-500">Boys (55%)</h2>
                 </div>
                 <div className="flex flex-col gap-1">
                     <div className="w-5 h-5 bg-lamaYellow rounded-full" />
                     <h1 className="font-bold">1,234</h1>
-                    <h2 className="text-xs text-gray-300">Girls (45%)</h2>
+                    <h2 className="text-xs text-gray-300 dark:text-slate-500">Girls (45%)</h2>
                 </div>
             </div>
         </div>
@@ -566,10 +598,10 @@ const CountChart = () => {
 
 const AttendanceChart = () => {
     return (
-        <div className="bg-white rounded-xl w-full h-full p-4">
+        <div className="bg-white dark:bg-slate-800 rounded-xl w-full h-full p-4">
             <div className="flex justify-between items-center mb-4">
                 <h1 className="text-lg font-semibold">Attendance</h1>
-                <MoreHorizontal size={20} className="cursor-pointer text-gray-400" />
+                <MoreHorizontal size={20} className="cursor-pointer text-gray-400 dark:text-slate-500" />
             </div>
             <div className="w-full h-[90%]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -593,10 +625,10 @@ const AttendanceChart = () => {
 
 const EarningsChart = () => {
     return (
-        <div className="bg-white rounded-3xl p-6 h-full shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 h-full shadow-sm dark:shadow-slate-900/50">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-slate-800">Earnings</h2>
-                <MoreHorizontal className="text-gray-400 cursor-pointer" />
+                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Earnings</h2>
+                <MoreHorizontal className="text-gray-400 dark:text-slate-500 cursor-pointer" />
             </div>
 
             <div className="h-[280px] w-full">
@@ -625,7 +657,7 @@ const EarningsChart = () => {
                             align="center"
                             height={36}
                             iconType="circle"
-                            formatter={(value) => <span className="text-slate-600 font-medium ml-1 mr-4">{value}</span>}
+                            formatter={(value) => <span className="text-slate-600 dark:text-slate-300 font-medium ml-1 mr-4">{value}</span>}
                         />
                         <Line
                             type="monotone"
@@ -654,22 +686,22 @@ const EarningsChart = () => {
 
 const EventCalendar = () => {
     return (
-        <div className="bg-white p-6 rounded-3xl shadow-sm">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm dark:shadow-slate-900/50">
             {/* Calendar Header */}
             <div className="flex items-center justify-between mb-6">
-                <div className="p-1 rounded-full border border-gray-200 cursor-pointer hover:bg-gray-50">
-                    <ChevronLeft size={16} className="text-gray-400" />
+                <div className="p-1 rounded-full border border-gray-200 dark:border-slate-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700">
+                    <ChevronLeft size={16} className="text-gray-400 dark:text-slate-500" />
                 </div>
-                <h2 className="font-bold text-lg text-slate-800">September 2030</h2>
-                <div className="p-1 rounded-full border border-gray-200 cursor-pointer hover:bg-gray-50">
-                    <ChevronRight size={16} className="text-gray-400" />
+                <h2 className="font-bold text-lg text-slate-800 dark:text-slate-100">September 2030</h2>
+                <div className="p-1 rounded-full border border-gray-200 dark:border-slate-700 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700">
+                    <ChevronRight size={16} className="text-gray-400 dark:text-slate-500" />
                 </div>
             </div>
 
             {/* Week Days */}
             <div className="grid grid-cols-7 text-center mb-2">
                 {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => (
-                    <span key={d} className={`text-xs font-medium ${d === 'Wed' ? 'text-sky-400' : 'text-gray-400'}`}>{d}</span>
+                    <span key={d} className={`text-xs font-medium ${d === 'Wed' ? 'text-sky-400' : 'text-gray-400 dark:text-slate-500'}`}>{d}</span>
                 ))}
             </div>
 
@@ -678,7 +710,7 @@ const EventCalendar = () => {
                 {[19, 20, 21, 22, 23, 24, 25].map(d => (
                     <div key={d} className="flex items-center justify-center">
                         <span className={`text-sm font-bold w-8 h-8 flex items-center justify-center rounded-xl cursor-pointer transition-colors
-                    ${d === 22 ? 'bg-lamaSky text-sky-600' : 'text-slate-800 hover:bg-gray-50'}`}>
+                    ${d === 22 ? 'bg-lamaSky text-sky-600' : 'text-slate-800 dark:text-slate-100 hover:bg-gray-50 dark:hover:bg-slate-700'}`}>
                             {d}
                         </span>
                     </div>
@@ -687,8 +719,8 @@ const EventCalendar = () => {
 
             {/* Agenda Header */}
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-lg font-bold text-slate-800">Agenda</h1>
-                <MoreHorizontal size={20} className="cursor-pointer text-gray-400" />
+                <h1 className="text-lg font-bold text-slate-800 dark:text-slate-100">Agenda</h1>
+                <MoreHorizontal size={20} className="cursor-pointer text-gray-400 dark:text-slate-500" />
             </div>
 
             {/* Agenda Items */}
@@ -696,12 +728,12 @@ const EventCalendar = () => {
                 {agendaItems.map(item => (
                     <div key={item.id} className="flex gap-4 items-center">
                         {/* Time */}
-                        <span className="text-xs font-bold text-gray-400 w-16">{item.time}</span>
+                        <span className="text-xs font-bold text-gray-400 dark:text-slate-500 w-16">{item.time}</span>
 
                         {/* Card */}
-                        <div className={`flex-1 p-3 rounded-lg border-l-4 ${item.colorBg} ${item.colorBorder}`}>
-                            <span className="text-[10px] text-gray-500 font-medium block mb-1">{item.scope}</span>
-                            <h3 className="text-sm font-bold text-slate-700 leading-tight">{item.title}</h3>
+                        <div className={`flex-1 p-3 rounded-lg border-l-4 ${withDarkBg(item.colorBg)} ${item.colorBorder}`}>
+                            <span className="text-[10px] text-gray-500 dark:text-slate-400 font-medium block mb-1">{item.scope}</span>
+                            <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 leading-tight">{item.title}</h3>
                         </div>
                     </div>
                 ))}
@@ -712,21 +744,21 @@ const EventCalendar = () => {
 
 const Announcements = () => {
     return (
-        <div className="bg-white p-4 rounded-xl">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl">
             <div className="flex justify-between items-center">
                 <h1 className="text-xl font-semibold">Announcements</h1>
-                <span className="text-xs text-gray-400 cursor-pointer">View All</span>
+                <span className="text-xs text-gray-400 dark:text-slate-500 cursor-pointer">View All</span>
             </div>
             <div className="flex flex-col gap-4 mt-4">
                 {announcements.map((ann) => (
-                    <div className={`${ann.bg} rounded-md p-4`} key={ann.id}>
+                    <div className={`${withDarkBg(ann.bg)} rounded-md p-4`} key={ann.id}>
                         <div className="flex items-center justify-between">
-                            <h2 className="font-medium text-gray-600">{ann.title}</h2>
-                            <span className="text-xs text-gray-400 bg-white rounded-md px-1 py-1">
+                            <h2 className="font-medium text-gray-600 dark:text-slate-300">{ann.title}</h2>
+                            <span className="text-xs text-gray-400 dark:text-slate-500 bg-white dark:bg-slate-800 rounded-md px-1 py-1">
                                 {ann.time}
                             </span>
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">{ann.description}</p>
+                        <p className="text-sm text-gray-500 dark:text-slate-400 mt-1">{ann.description}</p>
                     </div>
                 ))}
             </div>
@@ -736,32 +768,32 @@ const Announcements = () => {
 
 const NoticeBoard = () => {
     return (
-        <div className="bg-white p-4 rounded-3xl shadow-sm h-full">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-3xl shadow-sm dark:shadow-slate-900/50 h-full">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-slate-800">Notice Board</h2>
-                <Sliders size={18} className="text-gray-400 cursor-pointer transform rotate-90" />
+                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Notice Board</h2>
+                <Sliders size={18} className="text-gray-400 dark:text-slate-500 cursor-pointer transform rotate-90" />
             </div>
             <div className="flex flex-col gap-4">
                 {noticesData.map(notice => (
-                    <div key={notice.id} className="flex items-center justify-between pb-3 border-b border-gray-100 last:border-none last:pb-0">
+                    <div key={notice.id} className="flex items-center justify-between pb-3 border-b border-gray-100 dark:border-slate-700 last:border-none last:pb-0">
                         <div className="flex items-center gap-3">
                             <div className="w-8 h-8 rounded-full overflow-hidden shrink-0">
                                 <img src={notice.img} alt="" className="w-full h-full object-cover" />
                             </div>
-                            <h3 className="font-bold text-slate-700 text-xs md:text-sm">{notice.title}</h3>
+                            <h3 className="font-bold text-slate-700 dark:text-slate-200 text-xs md:text-sm">{notice.title}</h3>
                         </div>
 
-                        <span className="hidden md:block text-[10px] font-medium text-sky-600 bg-lamaSkyLight px-2 py-0.5 rounded-full">
+                        <span className="hidden md:block text-[10px] font-medium text-sky-600 bg-lamaSkyLight dark:bg-lamaSkyLightDark px-2 py-0.5 rounded-full">
                             {notice.date}
                         </span>
 
                         <div className="hidden md:flex flex-col min-w-[80px]">
-                            <span className="text-[10px] text-slate-600 font-medium">By {notice.author}</span>
-                            <span className="text-[9px] text-gray-400">({notice.role})</span>
+                            <span className="text-[10px] text-slate-600 dark:text-slate-300 font-medium">By {notice.author}</span>
+                            <span className="text-[9px] text-gray-400 dark:text-slate-500">({notice.role})</span>
                         </div>
 
-                        <div className="flex items-center gap-1.5 text-gray-500 text-[10px] font-medium shrink-0">
-                            <div className="w-5 h-5 rounded-full bg-lamaPurpleLight flex items-center justify-center text-purple-600">
+                        <div className="flex items-center gap-1.5 text-gray-500 dark:text-slate-400 text-[10px] font-medium shrink-0">
+                            <div className="w-5 h-5 rounded-full bg-lamaPurpleLight dark:bg-lamaPurpleLightDark flex items-center justify-center text-purple-600">
                                 <Eye size={10} />
                             </div>
                             <span>{notice.views}</span>
@@ -775,20 +807,20 @@ const NoticeBoard = () => {
 
 const StudentActivity = () => {
     return (
-        <div className="bg-white p-6 rounded-3xl shadow-sm h-full">
+        <div className="bg-white dark:bg-slate-800 p-6 rounded-3xl shadow-sm dark:shadow-slate-900/50 h-full">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-xl font-bold text-slate-800">Student Activity</h1>
-                <span className="text-xs text-gray-400 cursor-pointer">View All</span>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">Student Activity</h1>
+                <span className="text-xs text-gray-400 dark:text-slate-500 cursor-pointer">View All</span>
             </div>
             <div className="flex flex-col gap-6">
                 {activitiesData.map(act => (
                     <div key={act.id} className="flex gap-4 items-start">
-                        <div className={`min-w-8 w-8 h-8 rounded-full ${act.bg} flex items-center justify-center`}>
+                        <div className={`min-w-8 w-8 h-8 rounded-full ${withDarkBg(act.bg)} flex items-center justify-center`}>
                             {act.icon}
                         </div>
                         <div>
-                            <h3 className="font-semibold text-sm text-slate-800">{act.title}</h3>
-                            <p className="text-xs text-gray-500 mt-1 leading-relaxed">{act.desc}</p>
+                            <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100">{act.title}</h3>
+                            <p className="text-xs text-gray-500 dark:text-slate-400 mt-1 leading-relaxed">{act.desc}</p>
                         </div>
                     </div>
                 ))}
@@ -799,24 +831,24 @@ const StudentActivity = () => {
 
 const Messages = () => {
     return (
-        <div className="bg-white p-4 rounded-xl">
+        <div className="bg-white dark:bg-slate-800 p-4 rounded-xl">
             <div className="flex justify-between items-center mb-4">
-                <h1 className="text-xl font-semibold text-slate-800">Messages</h1>
-                <span className="text-xs text-gray-400 cursor-pointer">View All</span>
+                <h1 className="text-xl font-semibold text-slate-800 dark:text-slate-100">Messages</h1>
+                <span className="text-xs text-gray-400 dark:text-slate-500 cursor-pointer">View All</span>
             </div>
             <div className="flex flex-col gap-4">
                 {messagesData.map((msg) => (
-                    <div key={msg.id} className="flex gap-4 p-2 bg-white rounded-md hover:bg-gray-50 transition-colors">
+                    <div key={msg.id} className="flex gap-4 p-2 bg-white dark:bg-slate-800 rounded-md hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
                         <img src={msg.img} alt={msg.name} className="w-10 h-10 rounded-full object-cover" />
                         <div className="flex flex-col flex-1 gap-1 min-w-0">
                             <div className="flex justify-between items-center gap-2">
-                                <h3 className="font-semibold text-sm text-slate-800 truncate">{msg.name}</h3>
-                                <span className="text-[10px] text-gray-400 whitespace-nowrap">{msg.time}</span>
+                                <h3 className="font-semibold text-sm text-slate-800 dark:text-slate-100 truncate">{msg.name}</h3>
+                                <span className="text-[10px] text-gray-400 dark:text-slate-500 whitespace-nowrap">{msg.time}</span>
                             </div>
                             <div className="flex justify-between items-start">
-                                <p className="text-xs text-gray-500 line-clamp-2 pr-2 leading-relaxed">{msg.message}</p>
+                                <p className="text-xs text-gray-500 dark:text-slate-400 line-clamp-2 pr-2 leading-relaxed">{msg.message}</p>
                                 {msg.unread > 0 && (
-                                    <div className="w-5 h-5 rounded-full bg-lamaPurple flex items-center justify-center text-[10px] text-slate-600 font-bold flex-shrink-0">
+                                    <div className="w-5 h-5 rounded-full bg-lamaPurple flex items-center justify-center text-[10px] text-slate-600 dark:text-slate-300 font-bold flex-shrink-0">
                                         {msg.unread}
                                     </div>
                                 )}
@@ -831,10 +863,10 @@ const Messages = () => {
 
 const FeesChart = () => {
     return (
-        <div className="bg-white rounded-3xl p-6 h-[300px] shadow-sm">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 h-[300px] shadow-sm dark:shadow-slate-900/50">
             <div className="flex justify-between items-center mb-4">
-                <h2 className="text-lg font-bold text-slate-800">Fees Collection</h2>
-                <MoreHorizontal className="text-gray-400 cursor-pointer" />
+                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Fees Collection</h2>
+                <MoreHorizontal className="text-gray-400 dark:text-slate-500 cursor-pointer" />
             </div>
             <div className="w-full h-[220px]">
                 <ResponsiveContainer width="100%" height="100%">
@@ -874,28 +906,28 @@ const FeesChart = () => {
 
 const FeesTable = () => {
     return (
-        <div className="bg-white rounded-3xl p-6 shadow-sm mt-6 flex-1">
+        <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 mt-6 flex-1">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-bold text-slate-800">Fees Collection</h2>
+                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Fees Collection</h2>
             </div>
 
             <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm text-gray-500">
-                    <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
+                <table className="w-full text-left text-sm text-gray-500 dark:text-slate-400">
+                    <thead className="bg-lamaSkyLight dark:bg-lamaSkyLightDark text-slate-700 dark:text-slate-200 font-semibold">
                         <tr>
                             <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
-                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500" />
+                                <input type="checkbox" className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-sky-500 focus:ring-sky-500" />
                             </th>
                             <th className="p-4">Student Name</th>
                             <th className="p-4">Class</th>
                             <th className="p-4 rounded-tr-xl rounded-br-xl text-right">Tuition Fee</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-gray-50 dark:divide-slate-700">
                         {feesTableData.map((student) => (
-                            <tr key={student.id} className={`group hover:bg-gray-50 transition-colors ${student.selected ? 'bg-indigo-50/50 hover:bg-indigo-50/80' : ''}`}>
+                            <tr key={student.id} className={`group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${student.selected ? 'bg-indigo-50/50 dark:bg-indigo-900/20 hover:bg-indigo-50/80' : ''}`}>
                                 <td className="p-4">
-                                    <div className={`w-4 h-4 rounded flex items-center justify-center border ${student.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}>
+                                    <div className={`w-4 h-4 rounded flex items-center justify-center border ${student.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300 dark:border-slate-600'}`}>
                                         {student.selected && <Check size={12} className="text-white" />}
                                     </div>
                                 </td>
@@ -905,13 +937,13 @@ const FeesTable = () => {
                                             <img src={student.img} alt={student.name} className="w-full h-full object-cover" />
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="font-semibold text-slate-800">{student.name}</span>
-                                            <span className="text-[10px] text-gray-400">{student.studentId}</span>
+                                            <span className="font-semibold text-slate-800 dark:text-slate-100">{student.name}</span>
+                                            <span className="text-[10px] text-gray-400 dark:text-slate-500">{student.studentId}</span>
                                         </div>
                                     </div>
                                 </td>
-                                <td className="p-4 font-medium text-slate-700">{student.class}</td>
-                                <td className="p-4 text-right font-bold text-slate-700">{student.fee}</td>
+                                <td className="p-4 font-medium text-slate-700 dark:text-slate-200">{student.class}</td>
+                                <td className="p-4 text-right font-bold text-slate-700 dark:text-slate-200">{student.fee}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -919,12 +951,12 @@ const FeesTable = () => {
             </div>
 
             <div className="flex items-center gap-4 mt-6">
-                <button className="px-4 py-2 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
+                <button className="px-4 py-2 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                     Previous
                 </button>
             </div>
 
-            <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6">
+            <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-6">
                 <div className="flex items-center gap-2">
                     <Mail size={14} />
                     <span>emailaddress@mail.com</span>
@@ -942,30 +974,30 @@ const ExpensesPage = () => {
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-xl font-bold text-slate-800">School Expenses</h1>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">School Expenses</h1>
                 <div className="flex items-center gap-4 flex-wrap">
                     {/* Search */}
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                        <Search size={16} className="text-gray-400" />
-                        <input type="text" placeholder="Search by ID or Expense" className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 w-[250px]">
+                        <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                        <input type="text" placeholder="Search by ID or Expense" className="w-full bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
                     </div>
                     {/* Filters */}
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white cursor-pointer hover:bg-gray-50">
-                        <CalendarDays size={16} className="text-gray-400" />
-                        <span className="text-slate-600 font-medium">April 2024</span>
-                        <ChevronRight size={14} className="text-gray-400 rotate-90" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <CalendarDays size={16} className="text-gray-400 dark:text-slate-500" />
+                        <span className="text-slate-600 dark:text-slate-300 font-medium">April 2024</span>
+                        <ChevronRight size={14} className="text-gray-400 dark:text-slate-500 rotate-90" />
                     </div>
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white cursor-pointer hover:bg-gray-50">
-                        <span className="text-slate-600 font-medium">All Categories</span>
-                        <ChevronRight size={14} className="text-gray-400 rotate-90" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700">
+                        <span className="text-slate-600 dark:text-slate-300 font-medium">All Categories</span>
+                        <ChevronRight size={14} className="text-gray-400 dark:text-slate-500 rotate-90" />
                     </div>
                 </div>
             </div>
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1 flex flex-col">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                        <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
+                    <table className="w-full text-left text-sm text-gray-500 dark:text-slate-400">
+                        <thead className="bg-lamaSkyLight dark:bg-lamaSkyLightDark text-slate-700 dark:text-slate-200 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl">ID</th>
                                 <th className="p-4">Category</th>
@@ -976,21 +1008,21 @@ const ExpensesPage = () => {
                                 <th className="p-4 rounded-tr-xl rounded-br-xl">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-slate-700">
                             {expensesData.map((expense) => (
-                                <tr key={expense.id} className={`group hover:bg-gray-50 transition-colors ${expense.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
-                                    <td className="p-4 font-medium text-slate-700">{expense.id}</td>
-                                    <td className="p-4 text-slate-600">{expense.category}</td>
-                                    <td className="p-4 font-medium text-slate-800">{expense.expense}</td>
-                                    <td className="p-4 text-slate-600">{expense.quantity}</td>
-                                    <td className="p-4 font-bold text-slate-800">{expense.amount}</td>
-                                    <td className="p-4 text-slate-600">{expense.paymentDate}</td>
+                                <tr key={expense.id} className={`group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${expense.selected ? 'bg-purple-50/50 dark:bg-purple-900/20 hover:bg-purple-50' : ''}`}>
+                                    <td className="p-4 font-medium text-slate-700 dark:text-slate-200">{expense.id}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">{expense.category}</td>
+                                    <td className="p-4 font-medium text-slate-800 dark:text-slate-100">{expense.expense}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">{expense.quantity}</td>
+                                    <td className="p-4 font-bold text-slate-800 dark:text-slate-100">{expense.amount}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">{expense.paymentDate}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
-                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors">
+                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 dark:bg-purple-900/40 dark:hover:bg-purple-900/30 text-gray-400 dark:text-slate-500 hover:text-purple-600 transition-colors">
                                                 <FilePenLine size={14} />
                                             </button>
-                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
+                                            <button className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 dark:text-slate-500 hover:text-red-500 transition-colors">
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
@@ -1003,21 +1035,21 @@ const ExpensesPage = () => {
 
                 {/* Pagination */}
                 <div className="flex justify-center items-center mt-auto pt-6 gap-2">
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50 disabled:opacity-50">
+                    <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-500 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-50">
                         <ChevronLeft size={16} />
                     </button>
                     <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-lamaSky text-sky-600 font-bold text-xs">1</button>
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">2</button>
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">3</button>
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">4</button>
-                    <span className="text-gray-400 text-xs">...</span>
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">12</button>
-                    <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 text-gray-400 hover:bg-gray-50">
+                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">2</button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">3</button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">4</button>
+                    <span className="text-gray-400 dark:text-slate-500 text-xs">...</span>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">12</button>
+                    <button className="w-8 h-8 flex items-center justify-center rounded-lg border border-gray-200 dark:border-slate-700 text-gray-400 dark:text-slate-500 hover:bg-gray-50 dark:hover:bg-slate-700">
                         <ChevronRight size={16} />
                     </button>
                 </div>
 
-                <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
+                <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2">
                         <Mail size={14} />
                         <span>emailaddress@mail.com</span>
@@ -1085,17 +1117,17 @@ const LibraryPage = () => {
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold text-slate-800">All Books</h1>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">All Books</h1>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                        <Search size={16} className="text-gray-400" />
-                        <input type="text" placeholder="Search by Book Name or Writer" className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 w-[250px]">
+                        <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                        <input type="text" placeholder="Search by Book Name or Writer" className="w-full bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
                     </div>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors"
                     >
-                        <Plus size={16} className="text-slate-800" />
+                        <Plus size={16} className="text-slate-800 dark:text-slate-100" />
                     </button>
                 </div>
             </div>
@@ -1103,50 +1135,50 @@ const LibraryPage = () => {
             {/* Add Book Modal */}
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ animation: 'modalSlideIn 0.3s ease-out' }}>
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ animation: 'modalSlideIn 0.3s ease-out' }}>
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Add New Book</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Fill in the book details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Add New Book</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Fill in the book details below</p>
                             </div>
-                            <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors">
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="p-6 flex flex-col gap-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Book Title <span className="text-red-400">*</span></label>
-                                    <input type="text" placeholder="e.g. To Kill a Mockingbird" value={newBook.title} onChange={(e) => setNewBook({ ...newBook, title: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Book Title <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. To Kill a Mockingbird" value={newBook.title} onChange={(e) => setNewBook({ ...newBook, title: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Writer <span className="text-red-400">*</span></label>
-                                    <input type="text" placeholder="e.g. Harper Lee" value={newBook.writer} onChange={(e) => setNewBook({ ...newBook, writer: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Book ID <span className="text-red-400">*</span></label>
-                                    <input type="text" placeholder="e.g. 2024-ENG-010-01" value={newBook.id} onChange={(e) => setNewBook({ ...newBook, id: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
-                                </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Subject</label>
-                                    <input type="text" placeholder="e.g. English Literature" value={newBook.subject} onChange={(e) => setNewBook({ ...newBook, subject: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Writer <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. Harper Lee" value={newBook.writer} onChange={(e) => setNewBook({ ...newBook, writer: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Class</label>
-                                    <input type="text" placeholder="e.g. Class 10" value={newBook.class} onChange={(e) => setNewBook({ ...newBook, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Book ID <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. 2024-ENG-010-01" value={newBook.id} onChange={(e) => setNewBook({ ...newBook, id: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Publish Date</label>
-                                    <input type="text" placeholder="e.g. 1960" value={newBook.publishDate} onChange={(e) => setNewBook({ ...newBook, publishDate: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Subject</label>
+                                    <input type="text" placeholder="e.g. English Literature" value={newBook.subject} onChange={(e) => setNewBook({ ...newBook, subject: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Class</label>
+                                    <input type="text" placeholder="e.g. Class 10" value={newBook.class} onChange={(e) => setNewBook({ ...newBook, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Publish Date</label>
+                                    <input type="text" placeholder="e.g. 1960" value={newBook.publishDate} onChange={(e) => setNewBook({ ...newBook, publishDate: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
-                            <button onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
+                            <button onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Cancel</button>
                             <button onClick={handleAddBook} disabled={!newBook.title || !newBook.writer || !newBook.id || isSubmitting} className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
                                 {isSubmitting ? (<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>Adding...</>) : (<><Plus size={16} />Add Book</>)}
                             </button>
@@ -1158,50 +1190,50 @@ const LibraryPage = () => {
             {/* Edit Book Modal */}
             {editingBook && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingBook(null)}>
-                    <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ animation: 'modalSlideIn 0.3s ease-out' }}>
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                    <div className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()} style={{ animation: 'modalSlideIn 0.3s ease-out' }}>
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Edit Book</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Update book details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Edit Book</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Update book details below</p>
                             </div>
-                            <button onClick={() => setEditingBook(null)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => setEditingBook(null)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors">
                                 <X size={18} />
                             </button>
                         </div>
                         <div className="p-6 flex flex-col gap-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Book Title <span className="text-red-400">*</span></label>
-                                    <input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Book Title <span className="text-red-400">*</span></label>
+                                    <input type="text" value={editForm.title} onChange={(e) => setEditForm({ ...editForm, title: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Writer <span className="text-red-400">*</span></label>
-                                    <input type="text" value={editForm.writer} onChange={(e) => setEditForm({ ...editForm, writer: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Book ID</label>
-                                    <input type="text" value={editForm.id} onChange={(e) => setEditForm({ ...editForm, id: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
-                                </div>
-                                <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Subject</label>
-                                    <input type="text" value={editForm.subject} onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Writer <span className="text-red-400">*</span></label>
+                                    <input type="text" value={editForm.writer} onChange={(e) => setEditForm({ ...editForm, writer: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Class</label>
-                                    <input type="text" value={editForm.class} onChange={(e) => setEditForm({ ...editForm, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Book ID</label>
+                                    <input type="text" value={editForm.id} onChange={(e) => setEditForm({ ...editForm, id: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Publish Date</label>
-                                    <input type="text" value={editForm.publishDate} onChange={(e) => setEditForm({ ...editForm, publishDate: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Subject</label>
+                                    <input type="text" value={editForm.subject} onChange={(e) => setEditForm({ ...editForm, subject: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Class</label>
+                                    <input type="text" value={editForm.class} onChange={(e) => setEditForm({ ...editForm, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
+                                </div>
+                                <div className="flex flex-col gap-1.5">
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Publish Date</label>
+                                    <input type="text" value={editForm.publishDate} onChange={(e) => setEditForm({ ...editForm, publishDate: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                             </div>
                         </div>
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
-                            <button onClick={() => setEditingBook(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
+                            <button onClick={() => setEditingBook(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Cancel</button>
                             <button onClick={handleEditBook} disabled={!editForm.title || !editForm.writer || isSubmitting} className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 disabled:opacity-40 disabled:cursor-not-allowed transition-all flex items-center gap-2">
                                 {isSubmitting ? (<><div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>Saving...</>) : (<><FilePenLine size={16} />Save Changes</>)}
                             </button>
@@ -1210,10 +1242,10 @@ const LibraryPage = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1 flex flex-col">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                        <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
+                    <table className="w-full text-left text-sm text-gray-500 dark:text-slate-400">
+                        <thead className="bg-lamaSkyLight dark:bg-lamaSkyLightDark text-slate-700 dark:text-slate-200 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
                                     <input
@@ -1223,7 +1255,7 @@ const LibraryPage = () => {
                                             const checked = e.target.checked;
                                             setBooks(prev => prev.map(b => ({ ...b, selected: checked })));
                                         }}
-                                        className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500 cursor-pointer"
+                                        className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-sky-500 focus:ring-sky-500 cursor-pointer"
                                     />
                                 </th>
                                 <th className="p-4">Book ID</th>
@@ -1235,41 +1267,41 @@ const LibraryPage = () => {
                                 <th className="p-4 rounded-tr-xl rounded-br-xl">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-slate-700">
                             {books.map((book) => (
-                                <tr key={book.id} className={`group hover:bg-gray-50 transition-colors ${book.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
+                                <tr key={book.id} className={`group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${book.selected ? 'bg-purple-50/50 dark:bg-purple-900/20 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
                                         <div
                                             onClick={() => setBooks(prev => prev.map(b => b.id === book.id ? { ...b, selected: !b.selected } : b))}
-                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${book.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${book.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300 dark:border-slate-600'}`}
                                         >
                                             {book.selected && <Check size={12} className="text-white" />}
                                         </div>
                                     </td>
-                                    <td className="p-4 font-medium text-slate-600">{book.id}</td>
+                                    <td className="p-4 font-medium text-slate-600 dark:text-slate-300">{book.id}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-8 h-10 rounded overflow-hidden bg-gray-200">
+                                            <div className="w-8 h-10 rounded overflow-hidden bg-gray-200 dark:bg-slate-600">
                                                 <img src={book.img} alt={book.title} className="w-full h-full object-cover" />
                                             </div>
-                                            <span className="font-semibold text-slate-800">{book.title}</span>
+                                            <span className="font-semibold text-slate-800 dark:text-slate-100">{book.title}</span>
                                         </div>
                                     </td>
-                                    <td className="p-4 text-slate-600">{book.writer}</td>
-                                    <td className="p-4 text-slate-600">{book.subject}</td>
-                                    <td className="p-4 text-slate-600">{book.class}</td>
-                                    <td className="p-4 text-slate-600">{book.publishDate}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">{book.writer}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">{book.subject}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">{book.class}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">{book.publishDate}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => openEditBookModal(book)}
-                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors"
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 dark:bg-purple-900/40 dark:hover:bg-purple-900/30 text-gray-400 dark:text-slate-500 hover:text-purple-600 transition-colors"
                                             >
                                                 <FilePenLine size={14} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteBook(book.id)}
-                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors"
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 dark:text-slate-500 hover:text-red-500 transition-colors"
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -1283,23 +1315,23 @@ const LibraryPage = () => {
 
                 {/* Pagination */}
                 <div className="flex justify-center items-center mt-auto pt-6 gap-2">
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
+                    <button className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         Previous
                     </button>
                     <div className="flex gap-2">
                         <button className="w-8 h-8 flex items-center justify-center rounded-lg bg-lamaSky text-sky-600 font-bold text-xs">1</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">2</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">3</button>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">4</button>
-                        <span className="flex items-center text-gray-400 text-xs">...</span>
-                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 hover:bg-gray-50 text-xs">12</button>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">2</button>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">3</button>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">4</button>
+                        <span className="flex items-center text-gray-400 dark:text-slate-500 text-xs">...</span>
+                        <button className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 text-xs">12</button>
                     </div>
-                    <button className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50">
+                    <button className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700">
                         Next
                     </button>
                 </div>
 
-                <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
+                <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2">
                         <Mail size={14} />
                         <span>emailaddress@mail.com</span>
@@ -1427,22 +1459,22 @@ const StudentsPage = () => {
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-xl font-bold text-slate-800">All Students List</h1>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">All Students List</h1>
                 <div className="flex items-center gap-4 flex-wrap">
                     {/* Search */}
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                        <Search size={16} className="text-gray-400" />
-                        <input type="text" placeholder="Search..." className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 w-[250px]">
+                        <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                        <input type="text" placeholder="Search..." className="w-full bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
                     </div>
                     {/* Filters */}
                     <button className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors">
-                        <Sliders size={16} className="text-slate-800 rotate-90" />
+                        <Sliders size={16} className="text-slate-800 dark:text-slate-100 rotate-90" />
                     </button>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors"
                     >
-                        <Plus size={16} className="text-slate-800" />
+                        <Plus size={16} className="text-slate-800 dark:text-slate-100" />
                     </button>
                 </div>
             </div>
@@ -1451,19 +1483,19 @@ const StudentsPage = () => {
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Add New Student</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Fill in the student details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Add New Student</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Fill in the student details below</p>
                             </div>
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -1474,23 +1506,23 @@ const StudentsPage = () => {
                             {/* Name & Email */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Full Name <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Full Name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         placeholder="e.g. Sarah Miller"
                                         value={newStudent.name}
                                         onChange={(e) => setNewStudent({ ...newStudent, name: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Email <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Email <span className="text-red-400">*</span></label>
                                     <input
                                         type="email"
                                         placeholder="e.g. smiller@school.edu"
                                         value={newStudent.email}
                                         onChange={(e) => setNewStudent({ ...newStudent, email: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
@@ -1498,23 +1530,23 @@ const StudentsPage = () => {
                             {/* Student ID & Class */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Student ID <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Student ID <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         placeholder="e.g. 2024-01-001"
                                         value={newStudent.studentId}
                                         onChange={(e) => setNewStudent({ ...newStudent, studentId: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Class</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Class</label>
                                     <input
                                         type="text"
                                         placeholder="e.g. 10A"
                                         value={newStudent.class}
                                         onChange={(e) => setNewStudent({ ...newStudent, class: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
@@ -1522,32 +1554,32 @@ const StudentsPage = () => {
                             {/* DOB & Phone */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Date of Birth</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Date of Birth</label>
                                     <input
                                         type="date"
                                         value={newStudent.dob}
                                         onChange={(e) => setNewStudent({ ...newStudent, dob: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Phone</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Phone</label>
                                     <input
                                         type="tel"
                                         placeholder="e.g. (555) 101-0101"
                                         value={newStudent.phone}
                                         onChange={(e) => setNewStudent({ ...newStudent, phone: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -1577,18 +1609,18 @@ const StudentsPage = () => {
             {editingStudent && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingStudent(null)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Edit Student</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Update the student details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Edit Student</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Update the student details below</p>
                             </div>
                             <button
                                 onClick={() => setEditingStudent(null)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -1597,72 +1629,72 @@ const StudentsPage = () => {
                         <div className="p-6 flex flex-col gap-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Full Name <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Full Name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         value={editForm.name}
                                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Email <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Email <span className="text-red-400">*</span></label>
                                     <input
                                         type="email"
                                         value={editForm.email}
                                         onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Student ID <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Student ID <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         value={editForm.studentId}
                                         onChange={(e) => setEditForm({ ...editForm, studentId: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Class</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Class</label>
                                     <input
                                         type="text"
                                         value={editForm.class}
                                         onChange={(e) => setEditForm({ ...editForm, class: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Date of Birth</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Date of Birth</label>
                                     <input
                                         type="date"
                                         value={editForm.dob}
                                         onChange={(e) => setEditForm({ ...editForm, dob: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Phone</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Phone</label>
                                     <input
                                         type="tel"
                                         value={editForm.phone}
                                         onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                             <button
                                 onClick={() => setEditingStudent(null)}
-                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -1688,10 +1720,10 @@ const StudentsPage = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1 flex flex-col">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                        <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
+                    <table className="w-full text-left text-sm text-gray-500 dark:text-slate-400">
+                        <thead className="bg-lamaSkyLight dark:bg-lamaSkyLightDark text-slate-700 dark:text-slate-200 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
                                     <input
@@ -1701,7 +1733,7 @@ const StudentsPage = () => {
                                             const checked = e.target.checked;
                                             setStudents(prev => prev.map(s => ({ ...s, selected: checked })));
                                         }}
-                                        className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500 cursor-pointer"
+                                        className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-sky-500 focus:ring-sky-500 cursor-pointer"
                                     />
                                 </th>
                                 <th className="p-4">Student Name</th>
@@ -1712,13 +1744,13 @@ const StudentsPage = () => {
                                 <th className="p-4 rounded-tr-xl rounded-br-xl">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-slate-700">
                             {paginatedStudents.map((student) => (
-                                <tr key={student.id} className={`group hover:bg-gray-50 transition-colors ${student.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
+                                <tr key={student.id} className={`group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${student.selected ? 'bg-purple-50/50 dark:bg-purple-900/20 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
                                         <div
                                             onClick={() => setStudents(prev => prev.map(s => s.id === student.id ? { ...s, selected: !s.selected } : s))}
-                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${student.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${student.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300 dark:border-slate-600'}`}
                                         >
                                             {student.selected && <Check size={12} className="text-white" />}
                                         </div>
@@ -1729,30 +1761,30 @@ const StudentsPage = () => {
                                                 <img src={student.img} alt={student.name} className="w-full h-full object-cover" />
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="font-semibold text-slate-800">{student.name}</span>
-                                                <span className="text-[10px] text-gray-400">{student.email}</span>
+                                                <span className="font-semibold text-slate-800 dark:text-slate-100">{student.name}</span>
+                                                <span className="text-[10px] text-gray-400 dark:text-slate-500">{student.email}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-4 font-medium text-slate-600">{student.studentId}</td>
-                                    <td className="p-4 font-medium text-slate-800">{student.class}</td>
-                                    <td className="p-4 text-slate-600">
-                                        <span className="bg-gray-50 px-2 py-1 rounded-md text-xs font-medium border border-gray-100">
+                                    <td className="p-4 font-medium text-slate-600 dark:text-slate-300">{student.studentId}</td>
+                                    <td className="p-4 font-medium text-slate-800 dark:text-slate-100">{student.class}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">
+                                        <span className="bg-gray-50 dark:bg-slate-700 px-2 py-1 rounded-md text-xs font-medium border border-gray-100 dark:border-slate-700">
                                             {student.dob}
                                         </span>
                                     </td>
-                                    <td className="p-4 text-slate-600 font-medium">{student.phone}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300 font-medium">{student.phone}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => openEditStudentModal(student)}
-                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors"
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 dark:bg-purple-900/40 dark:hover:bg-purple-900/30 text-gray-400 dark:text-slate-500 hover:text-purple-600 transition-colors"
                                             >
                                                 <FilePenLine size={14} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteStudent(student.id)}
-                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors"
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 dark:text-slate-500 hover:text-red-500 transition-colors"
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -1769,22 +1801,22 @@ const StudentsPage = () => {
                         <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => p - 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Previous
                         </button>
-                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Page {currentPage} of {totalPages}</span>
                         <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(p => p + 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Next
                         </button>
                     </div>
                 )}
 
-                <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
+                <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2">
                         <Mail size={14} />
                         <span>emailaddress@mail.com</span>
@@ -1984,22 +2016,22 @@ const TeachersPage = () => {
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-xl font-bold text-slate-800">All Teachers</h1>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">All Teachers</h1>
                 <div className="flex items-center gap-4 flex-wrap">
                     {/* Search */}
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                        <Search size={16} className="text-gray-400" />
-                        <input type="text" placeholder="Search..." className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 w-[250px]">
+                        <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                        <input type="text" placeholder="Search..." className="w-full bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
                     </div>
                     {/* Filters */}
                     <button className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors">
-                        <Sliders size={16} className="text-slate-800 rotate-90" />
+                        <Sliders size={16} className="text-slate-800 dark:text-slate-100 rotate-90" />
                     </button>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors"
                     >
-                        <Plus size={16} className="text-slate-800" />
+                        <Plus size={16} className="text-slate-800 dark:text-slate-100" />
                     </button>
                 </div>
             </div>
@@ -2008,19 +2040,19 @@ const TeachersPage = () => {
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Add New Teacher</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Fill in the details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Add New Teacher</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Fill in the details below</p>
                             </div>
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -2031,23 +2063,23 @@ const TeachersPage = () => {
                             {/* Name & Email Row */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Full Name <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Full Name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         placeholder="e.g. John Smith"
                                         value={newTeacher.name}
                                         onChange={(e) => setNewTeacher({ ...newTeacher, name: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Email <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Email <span className="text-red-400">*</span></label>
                                     <input
                                         type="email"
                                         placeholder="e.g. jsmith@school.edu"
                                         value={newTeacher.email}
                                         onChange={(e) => setNewTeacher({ ...newTeacher, email: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
@@ -2055,23 +2087,23 @@ const TeachersPage = () => {
                             {/* Teacher ID & Phone */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Teacher ID <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Teacher ID <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         placeholder="e.g. 1234567890"
                                         value={newTeacher.teacherId}
                                         onChange={(e) => setNewTeacher({ ...newTeacher, teacherId: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Phone</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Phone</label>
                                     <input
                                         type="tel"
                                         placeholder="e.g. (555) 555-5555"
                                         value={newTeacher.phone}
                                         onChange={(e) => setNewTeacher({ ...newTeacher, phone: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
@@ -2079,47 +2111,47 @@ const TeachersPage = () => {
                             {/* Subjects & Classes */}
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Subjects</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Subjects</label>
                                     <input
                                         type="text"
                                         placeholder="e.g. Math, Physics"
                                         value={newTeacher.subjects}
                                         onChange={(e) => setNewTeacher({ ...newTeacher, subjects: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
-                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-500">Separate with commas</span>
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Classes</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Classes</label>
                                     <input
                                         type="text"
                                         placeholder="e.g. 1A, 2B, 3C"
                                         value={newTeacher.classes}
                                         onChange={(e) => setNewTeacher({ ...newTeacher, classes: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
-                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-500">Separate with commas</span>
                                 </div>
                             </div>
 
                             {/* Address */}
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-slate-600">Address</label>
+                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Address</label>
                                 <input
                                     type="text"
                                     placeholder="e.g. 123 Main St, Anytown, USA"
                                     value={newTeacher.address}
                                     onChange={(e) => setNewTeacher({ ...newTeacher, address: e.target.value })}
-                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                 />
                             </div>
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -2149,18 +2181,18 @@ const TeachersPage = () => {
             {editingTeacher && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingTeacher(null)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Edit Teacher</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Update the details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Edit Teacher</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Update the details below</p>
                             </div>
                             <button
                                 onClick={() => setEditingTeacher(null)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -2169,84 +2201,84 @@ const TeachersPage = () => {
                         <div className="p-6 flex flex-col gap-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Full Name <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Full Name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         value={editForm.name}
                                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Email <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Email <span className="text-red-400">*</span></label>
                                     <input
                                         type="email"
                                         value={editForm.email}
                                         onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Teacher ID <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Teacher ID <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         value={editForm.teacherId}
                                         onChange={(e) => setEditForm({ ...editForm, teacherId: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Phone</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Phone</label>
                                     <input
                                         type="tel"
                                         value={editForm.phone}
                                         onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Subjects</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Subjects</label>
                                     <input
                                         type="text"
                                         value={editForm.subjects}
                                         onChange={(e) => setEditForm({ ...editForm, subjects: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
-                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-500">Separate with commas</span>
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Classes</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Classes</label>
                                     <input
                                         type="text"
                                         value={editForm.classes}
                                         onChange={(e) => setEditForm({ ...editForm, classes: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
-                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-500">Separate with commas</span>
                                 </div>
                             </div>
 
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-slate-600">Address</label>
+                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Address</label>
                                 <input
                                     type="text"
                                     value={editForm.address}
                                     onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                 />
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                             <button
                                 onClick={() => setEditingTeacher(null)}
-                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -2272,10 +2304,10 @@ const TeachersPage = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1 flex flex-col">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                        <thead className="bg-lamaSkyLight text-slate-700 font-semibold">
+                    <table className="w-full text-left text-sm text-gray-500 dark:text-slate-400">
+                        <thead className="bg-lamaSkyLight dark:bg-lamaSkyLightDark text-slate-700 dark:text-slate-200 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
                                     <input
@@ -2285,7 +2317,7 @@ const TeachersPage = () => {
                                             const checked = e.target.checked;
                                             setTeachers(prev => prev.map(t => ({ ...t, selected: checked })));
                                         }}
-                                        className="w-4 h-4 rounded border-gray-300 text-sky-500 focus:ring-sky-500 cursor-pointer"
+                                        className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-sky-500 focus:ring-sky-500 cursor-pointer"
                                     />
                                 </th>
                                 <th className="p-4">Teacher Name</th>
@@ -2297,13 +2329,13 @@ const TeachersPage = () => {
                                 <th className="p-4 rounded-tr-xl rounded-br-xl">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-slate-700">
                             {paginatedTeachers.map((teacher) => (
-                                <tr key={teacher.id} className={`group hover:bg-gray-50 transition-colors ${teacher.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
+                                <tr key={teacher.id} className={`group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${teacher.selected ? 'bg-purple-50/50 dark:bg-purple-900/20 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
                                         <div
                                             onClick={() => setTeachers(prev => prev.map(t => t.id === teacher.id ? { ...t, selected: !t.selected } : t))}
-                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${teacher.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300'}`}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${teacher.selected ? 'bg-sky-400 border-sky-400' : 'border-gray-300 dark:border-slate-600'}`}
                                         >
                                             {teacher.selected && <Check size={12} className="text-white" />}
                                         </div>
@@ -2314,43 +2346,43 @@ const TeachersPage = () => {
                                                 <img src={teacher.img} alt={teacher.name} className="w-full h-full object-cover" />
                                             </div>
                                             <div className="flex flex-col">
-                                                <span className="font-semibold text-slate-800">{teacher.name}</span>
-                                                <span className="text-[10px] text-gray-400">{teacher.email}</span>
+                                                <span className="font-semibold text-slate-800 dark:text-slate-100">{teacher.name}</span>
+                                                <span className="text-[10px] text-gray-400 dark:text-slate-500">{teacher.email}</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td className="p-4 font-medium text-slate-600">{teacher.teacherId}</td>
-                                    <td className="p-4 text-slate-600">
+                                    <td className="p-4 font-medium text-slate-600 dark:text-slate-300">{teacher.teacherId}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">
                                         <div className="flex gap-1 flex-wrap">
                                             {teacher.subjects.map((sub, idx) => (
-                                                <span key={idx} className="bg-gray-50 px-2 py-0.5 rounded text-[10px] border border-gray-100 text-gray-500 font-medium">
+                                                <span key={idx} className="bg-gray-50 dark:bg-slate-700 px-2 py-0.5 rounded text-[10px] border border-gray-100 dark:border-slate-700 text-gray-500 dark:text-slate-400 font-medium">
                                                     {sub}
                                                 </span>
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="p-4 text-slate-600">
+                                    <td className="p-4 text-slate-600 dark:text-slate-300">
                                         <div className="flex gap-1 flex-wrap">
                                             {teacher.classes.map((cls, idx) => (
-                                                <span key={idx} className="bg-gray-50 px-2 py-0.5 rounded text-[10px] border border-gray-100 text-gray-500 font-medium">
+                                                <span key={idx} className="bg-gray-50 dark:bg-slate-700 px-2 py-0.5 rounded text-[10px] border border-gray-100 dark:border-slate-700 text-gray-500 dark:text-slate-400 font-medium">
                                                     {cls}
                                                 </span>
                                             ))}
                                         </div>
                                     </td>
-                                    <td className="p-4 text-slate-600 font-medium">{teacher.phone}</td>
-                                    <td className="p-4 text-slate-600 text-xs max-w-[150px] truncate" title={teacher.address}>{teacher.address}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300 font-medium">{teacher.phone}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300 text-xs max-w-[150px] truncate" title={teacher.address}>{teacher.address}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
                                             <button
                                                 onClick={() => openEditModal(teacher)}
-                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors"
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 dark:bg-purple-900/40 dark:hover:bg-purple-900/30 text-gray-400 dark:text-slate-500 hover:text-purple-600 transition-colors"
                                             >
                                                 <FilePenLine size={14} />
                                             </button>
                                             <button
                                                 onClick={() => handleDeleteTeacher(teacher.id)}
-                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors"
+                                                className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 dark:text-slate-500 hover:text-red-500 transition-colors"
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -2367,22 +2399,22 @@ const TeachersPage = () => {
                         <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => p - 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Previous
                         </button>
-                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Page {currentPage} of {totalPages}</span>
                         <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(p => p + 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Next
                         </button>
                     </div>
                 )}
 
-                <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
+                <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2">
                         <Mail size={14} />
                         <span>emailaddress@mail.com</span>
@@ -2458,34 +2490,34 @@ const CalendarPage = () => {
             {showModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowModal(false)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-md"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">{editingEvent ? 'Edit Event' : 'Add Event'}</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">{editingEvent ? 'Update event details' : 'Create a new calendar event'}</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{editingEvent ? 'Edit Event' : 'Add Event'}</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">{editingEvent ? 'Update event details' : 'Create a new calendar event'}</p>
                             </div>
-                            <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => setShowModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors">
                                 <X size={18} />
                             </button>
                         </div>
 
                         <div className="p-6 flex flex-col gap-4">
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-slate-600">Event Title <span className="text-red-400">*</span></label>
+                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Event Title <span className="text-red-400">*</span></label>
                                 <input
                                     type="text"
                                     placeholder="e.g. Science Fair"
                                     value={eventForm.title}
                                     onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
-                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                 />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Day (1-31) <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Day (1-31) <span className="text-red-400">*</span></label>
                                     <input
                                         type="number"
                                         min={1}
@@ -2493,15 +2525,15 @@ const CalendarPage = () => {
                                         placeholder="e.g. 15"
                                         value={eventForm.date}
                                         onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Category</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Category</label>
                                     <select
                                         value={eventForm.category}
                                         onChange={(e) => setEventForm({ ...eventForm, category: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     >
                                         {eventCategories.map((cat, i) => (
                                             <option key={i} value={i}>{cat.label}</option>
@@ -2511,7 +2543,7 @@ const CalendarPage = () => {
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-between p-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-between p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                             <div>
                                 {editingEvent && (
                                     <button
@@ -2524,7 +2556,7 @@ const CalendarPage = () => {
                                 )}
                             </div>
                             <div className="flex items-center gap-3">
-                                <button onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">
+                                <button onClick={() => setShowModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">
                                     Cancel
                                 </button>
                                 <button
@@ -2542,9 +2574,9 @@ const CalendarPage = () => {
             )}
 
             {/* Left: Calendar View */}
-            <div className="w-full md:w-3/4 flex flex-col h-full bg-white rounded-3xl p-6 shadow-sm overflow-hidden">
+            <div className="w-full md:w-3/4 flex flex-col h-full bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 overflow-hidden">
                 <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-xl font-bold text-slate-800">May 2030</h1>
+                    <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">May 2030</h1>
                     <div className="flex items-center gap-4">
                         <button
                             onClick={() => openAddModal()}
@@ -2553,12 +2585,12 @@ const CalendarPage = () => {
                             <Plus size={14} />
                             Add Event
                         </button>
-                        <span className="text-xs font-semibold text-gray-400">Today</span>
+                        <span className="text-xs font-semibold text-gray-400 dark:text-slate-500">Today</span>
                         <div className="flex gap-1">
-                            <div className="p-1 rounded-md bg-purple-100 text-purple-600 cursor-pointer hover:bg-purple-200">
+                            <div className="p-1 rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-600 cursor-pointer hover:bg-purple-200 dark:hover:bg-purple-900/60">
                                 <ChevronLeft size={16} />
                             </div>
-                            <div className="p-1 rounded-md bg-purple-100 text-purple-600 cursor-pointer hover:bg-purple-200">
+                            <div className="p-1 rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-600 cursor-pointer hover:bg-purple-200 dark:hover:bg-purple-900/60">
                                 <ChevronRight size={16} />
                             </div>
                         </div>
@@ -2569,7 +2601,7 @@ const CalendarPage = () => {
                     {/* Header */}
                     <div className="grid grid-cols-7 mb-4">
                         {weekDays.map(day => (
-                            <div key={day} className="text-center text-xs font-semibold text-gray-400 uppercase">
+                            <div key={day} className="text-center text-xs font-semibold text-gray-400 dark:text-slate-500 uppercase">
                                 {day}
                             </div>
                         ))}
@@ -2578,20 +2610,20 @@ const CalendarPage = () => {
                     {/* Grid */}
                     <div className="grid grid-cols-7 flex-1 auto-rows-fr gap-4">
                         {[...Array(3)].map((_, i) => (
-                            <div key={`empty-${i}`} className="h-full min-h-[100px] border-t border-gray-100 p-2"></div>
+                            <div key={`empty-${i}`} className="h-full min-h-[100px] border-t border-gray-100 dark:border-slate-700 p-2"></div>
                         ))}
 
                         {[...Array(31)].map((_, i) => {
                             const day = i + 1;
                             const dayEvents = events.filter(e => e.date === day);
                             return (
-                                <div key={day} className="h-full min-h-[100px] border-t border-gray-100 p-2 flex flex-col gap-1 relative group hover:bg-gray-50 transition-colors">
-                                    <span className="text-xs font-semibold text-gray-500 mb-1 block">{day.toString().padStart(2, '0')}</span>
+                                <div key={day} className="h-full min-h-[100px] border-t border-gray-100 dark:border-slate-700 p-2 flex flex-col gap-1 relative group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors">
+                                    <span className="text-xs font-semibold text-gray-500 dark:text-slate-400 mb-1 block">{day.toString().padStart(2, '0')}</span>
                                     {dayEvents.map(event => (
                                         <div
                                             key={event.id}
                                             onClick={() => openEditModal(event)}
-                                            className={`text-[10px] px-2 py-1 rounded-md truncate font-medium ${event.bgColor} ${event.color} cursor-pointer hover:opacity-80`}
+                                            className={`text-[10px] px-2 py-1 rounded-md truncate font-medium ${withDarkBg(event.bgColor)} ${event.color} cursor-pointer hover:opacity-80`}
                                         >
                                             {event.title}
                                         </div>
@@ -2599,7 +2631,7 @@ const CalendarPage = () => {
                                     {/* Add button on hover */}
                                     <button
                                         onClick={() => openAddModal(day)}
-                                        className="hidden group-hover:flex absolute top-2 right-2 w-5 h-5 bg-purple-100 rounded-full items-center justify-center text-purple-600 hover:bg-purple-200"
+                                        className="hidden group-hover:flex absolute top-2 right-2 w-5 h-5 bg-purple-100 dark:bg-purple-900/40 rounded-full items-center justify-center text-purple-600 hover:bg-purple-200 dark:hover:bg-purple-900/60"
                                     >
                                         <Plus size={12} />
                                     </button>
@@ -2608,7 +2640,7 @@ const CalendarPage = () => {
                         })}
 
                         {[...Array(1)].map((_, i) => (
-                            <div key={`empty-end-${i}`} className="h-full min-h-[100px] border-t border-gray-100 p-2"></div>
+                            <div key={`empty-end-${i}`} className="h-full min-h-[100px] border-t border-gray-100 dark:border-slate-700 p-2"></div>
                         ))}
                     </div>
                 </div>
@@ -2617,41 +2649,41 @@ const CalendarPage = () => {
             {/* Right: Sidebar Widgets */}
             <div className="w-full md:w-1/4 flex flex-col gap-6">
                 {/* Agenda */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm">
+                <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-lg font-bold text-slate-800">Agenda</h2>
-                        <MoreHorizontal className="text-gray-400 cursor-pointer" />
+                        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Agenda</h2>
+                        <MoreHorizontal className="text-gray-400 dark:text-slate-500 cursor-pointer" />
                     </div>
                     <div className="flex flex-col gap-4">
                         {calendarAgenda.map(item => (
-                            <div key={item.id} className={`p-3 rounded-lg border-l-4 ${item.colorBorder} ${item.colorBg}`}>
-                                <h3 className="text-xs font-bold text-slate-700">{item.title}</h3>
+                            <div key={item.id} className={`p-3 rounded-lg border-l-4 ${item.colorBorder} ${withDarkBg(item.colorBg)}`}>
+                                <h3 className="text-xs font-bold text-slate-700 dark:text-slate-200">{item.title}</h3>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* Daily Schedule */}
-                <div className="bg-white rounded-3xl p-6 shadow-sm flex-1">
+                <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1">
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-lg font-bold text-slate-800">May, 8 2030</h2>
-                        <MoreHorizontal className="text-gray-400 cursor-pointer" />
+                        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">May, 8 2030</h2>
+                        <MoreHorizontal className="text-gray-400 dark:text-slate-500 cursor-pointer" />
                     </div>
 
                     <div className="flex flex-col gap-6 relative">
                         {/* Timeline Line */}
-                        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gray-100"></div>
+                        <div className="absolute left-[7px] top-2 bottom-2 w-0.5 bg-gray-100 dark:bg-slate-700"></div>
 
                         {dailySchedule.map(item => (
                             <div key={item.id} className="relative pl-6">
                                 {/* Dot */}
-                                <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full border-[3px] border-white bg-slate-800 ring-1 ring-slate-200 z-10"></div>
+                                <div className="absolute left-0 top-1.5 w-4 h-4 rounded-full border-[3px] border-white dark:border-slate-800 bg-slate-800 dark:bg-slate-200 ring-1 ring-slate-200 dark:ring-slate-600 z-10"></div>
 
                                 <div className="flex justify-between items-start mb-1">
-                                    <h3 className="text-xs font-bold text-slate-800">{item.title}</h3>
-                                    <span className="text-[10px] text-gray-400 whitespace-nowrap">{item.time}</span>
+                                    <h3 className="text-xs font-bold text-slate-800 dark:text-slate-100">{item.title}</h3>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-500 whitespace-nowrap">{item.time}</span>
                                 </div>
-                                <span className="text-[10px] text-gray-400 block mb-2">{item.group}</span>
+                                <span className="text-[10px] text-gray-400 dark:text-slate-500 block mb-2">{item.group}</span>
 
                                 <div className={`h-1 w-12 rounded-full ${item.bg.replace('light', '').replace('bg-', 'bg-').replace('100', '400')}`}></div>
                             </div>
@@ -2667,44 +2699,44 @@ const MessagesPage = () => {
     return (
         <div className="p-6 h-full relative">
             {/* Coming Soon Overlay */}
-            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 backdrop-blur-sm rounded-3xl m-6">
+            <div className="absolute inset-0 z-20 flex items-center justify-center bg-white/60 dark:bg-slate-900/60 backdrop-blur-sm rounded-3xl m-6">
                 <div className="text-center">
-                    <div className="w-16 h-16 rounded-full bg-sky-100 flex items-center justify-center mx-auto mb-4">
+                    <div className="w-16 h-16 rounded-full bg-sky-100 dark:bg-sky-900/40 flex items-center justify-center mx-auto mb-4">
                         <MessageCircle size={28} className="text-sky-500" />
                     </div>
-                    <h2 className="text-2xl font-bold text-slate-800 mb-2">Coming Soon</h2>
-                    <p className="text-sm text-gray-500 max-w-xs">The messaging feature is currently under development. Stay tuned!</p>
+                    <h2 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Coming Soon</h2>
+                    <p className="text-sm text-gray-500 dark:text-slate-400 max-w-xs">The messaging feature is currently under development. Stay tuned!</p>
                 </div>
             </div>
-            <div className="bg-white rounded-3xl h-full shadow-sm flex overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl h-full shadow-sm dark:shadow-slate-900/50 flex overflow-hidden">
                 {/* Left: Message List */}
-                <div className="w-full md:w-1/3 border-r border-gray-100 flex flex-col">
-                    <div className="p-4 border-b border-gray-100 flex items-center gap-2">
-                        <div className="flex-1 flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white">
-                            <Search size={16} className="text-gray-400" />
-                            <input type="text" placeholder="Search" className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
-                            <Sliders size={16} className="text-gray-400 rotate-90 cursor-pointer" />
+                <div className="w-full md:w-1/3 border-r border-gray-100 dark:border-slate-700 flex flex-col">
+                    <div className="p-4 border-b border-gray-100 dark:border-slate-700 flex items-center gap-2">
+                        <div className="flex-1 flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800">
+                            <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                            <input type="text" placeholder="Search" className="w-full bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
+                            <Sliders size={16} className="text-gray-400 dark:text-slate-500 rotate-90 cursor-pointer" />
                         </div>
-                        <div className="w-9 h-9 rounded-full bg-lamaSkyLight flex items-center justify-center cursor-pointer text-sky-600 hover:bg-sky-200 transition-colors">
+                        <div className="w-9 h-9 rounded-full bg-lamaSkyLight dark:bg-lamaSkyLightDark flex items-center justify-center cursor-pointer text-sky-600 hover:bg-sky-200 transition-colors">
                             <Plus size={18} />
                         </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto custom-scrollbar">
                         {messageThreads.map(thread => (
-                            <div key={thread.id} className={`p-4 flex gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-l-4 ${thread.selected ? 'bg-lamaPurpleLight border-l-lamaPurple' : 'border-l-transparent'}`}>
+                            <div key={thread.id} className={`p-4 flex gap-3 cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-l-4 ${thread.selected ? 'bg-lamaPurpleLight dark:bg-lamaPurpleLightDark border-l-lamaPurple' : 'border-l-transparent'}`}>
                                 <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
                                     <img src={thread.avatar} alt={thread.name} className="w-full h-full object-cover" />
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex justify-between items-center mb-1">
-                                        <h3 className="text-sm font-bold text-slate-800 truncate">{thread.name}</h3>
-                                        <span className="text-[10px] text-gray-400">{thread.time}</span>
+                                        <h3 className="text-sm font-bold text-slate-800 dark:text-slate-100 truncate">{thread.name}</h3>
+                                        <span className="text-[10px] text-gray-400 dark:text-slate-500">{thread.time}</span>
                                     </div>
                                     <div className="flex justify-between items-start">
-                                        <p className="text-xs text-gray-500 line-clamp-2 leading-relaxed">{thread.snippet}</p>
+                                        <p className="text-xs text-gray-500 dark:text-slate-400 line-clamp-2 leading-relaxed">{thread.snippet}</p>
                                         {thread.unread > 0 && (
-                                            <div className="ml-2 w-4 h-4 rounded-full bg-lamaPurple flex items-center justify-center text-[8px] font-bold text-slate-700 shrink-0">
+                                            <div className="ml-2 w-4 h-4 rounded-full bg-lamaPurple flex items-center justify-center text-[8px] font-bold text-slate-700 dark:text-slate-200 shrink-0">
                                                 {thread.unread}
                                             </div>
                                         )}
@@ -2716,22 +2748,22 @@ const MessagesPage = () => {
                 </div>
 
                 {/* Right: Chat Detail */}
-                <div className="hidden md:flex flex-col w-2/3 bg-lamaPurpleLight/30">
+                <div className="hidden md:flex flex-col w-2/3 bg-lamaPurpleLight/30 dark:bg-slate-900/50">
                     {/* Chat Header */}
-                    <div className="p-4 border-b border-gray-100 bg-white flex justify-between items-center h-[72px]">
+                    <div className="p-4 border-b border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 flex justify-between items-center h-[72px]">
                         <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-full overflow-hidden">
                                 <img src="https://images.pexels.com/photos/5905710/pexels-photo-5905710.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Staff Coordination" className="w-full h-full object-cover" />
                             </div>
                             <div>
-                                <h2 className="font-bold text-slate-800 text-sm">Staff Coordination</h2>
-                                <p className="text-[10px] text-gray-400">Click here to view group info</p>
+                                <h2 className="font-bold text-slate-800 dark:text-slate-100 text-sm">Staff Coordination</h2>
+                                <p className="text-[10px] text-gray-400 dark:text-slate-500">Click here to view group info</p>
                             </div>
                         </div>
-                        <div className="flex gap-4 text-gray-400">
-                            <Phone size={20} className="cursor-pointer hover:text-slate-600" />
-                            <Video size={20} className="cursor-pointer hover:text-slate-600" />
-                            <MoreVertical size={20} className="cursor-pointer hover:text-slate-600" />
+                        <div className="flex gap-4 text-gray-400 dark:text-slate-500">
+                            <Phone size={20} className="cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 dark:text-slate-300" />
+                            <Video size={20} className="cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 dark:text-slate-300" />
+                            <MoreVertical size={20} className="cursor-pointer hover:text-slate-600 dark:hover:text-slate-300 dark:text-slate-300" />
                         </div>
                     </div>
 
@@ -2739,7 +2771,7 @@ const MessagesPage = () => {
                     <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 custom-scrollbar">
                         {/* Date Separator */}
                         <div className="flex justify-center">
-                            <span className="text-[10px] bg-white px-3 py-1 rounded-full text-gray-400 shadow-sm border border-gray-100">Today</span>
+                            <span className="text-[10px] bg-white dark:bg-slate-800 px-3 py-1 rounded-full text-gray-400 dark:text-slate-500 shadow-sm dark:shadow-slate-900/50 border border-gray-100 dark:border-slate-700">Today</span>
                         </div>
 
                         {activeChatMessages.map(msg => (
@@ -2751,27 +2783,27 @@ const MessagesPage = () => {
                                     {!msg.isMe && (
                                         <span className={`text-[10px] font-bold ${msg.color}`}>{msg.sender}</span>
                                     )}
-                                    <div className={`p-3 rounded-xl shadow-sm text-xs leading-relaxed ${msg.isMe ? 'bg-lamaSkyLight rounded-tr-none text-slate-700' : 'bg-white rounded-tl-none text-slate-600'}`}>
+                                    <div className={`p-3 rounded-xl shadow-sm dark:shadow-slate-900/50 text-xs leading-relaxed ${msg.isMe ? 'bg-lamaSkyLight dark:bg-lamaSkyLightDark rounded-tr-none text-slate-700 dark:text-slate-200' : 'bg-white dark:bg-slate-800 rounded-tl-none text-slate-600 dark:text-slate-300'}`}>
                                         {msg.text}
                                     </div>
-                                    <span className="text-[9px] text-gray-400">{msg.time}</span>
+                                    <span className="text-[9px] text-gray-400 dark:text-slate-500">{msg.time}</span>
                                 </div>
                             </div>
                         ))}
                     </div>
 
                     {/* Input Area */}
-                    <div className="p-4 bg-white border-t border-gray-100">
-                        <div className="flex items-center gap-2 bg-gray-50 rounded-full px-2 py-2 border border-gray-200">
-                            <div className="p-2 rounded-full bg-gray-100 text-gray-400 cursor-pointer hover:bg-gray-200">
+                    <div className="p-4 bg-white dark:bg-slate-800 border-t border-gray-100 dark:border-slate-700">
+                        <div className="flex items-center gap-2 bg-gray-50 dark:bg-slate-700 rounded-full px-2 py-2 border border-gray-200 dark:border-slate-700">
+                            <div className="p-2 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-400 dark:text-slate-500 cursor-pointer hover:bg-gray-200 dark:bg-slate-600">
                                 <Paperclip size={18} />
                             </div>
-                            <input type="text" placeholder="Type your message" className="flex-1 bg-transparent outline-none text-sm text-slate-700 placeholder-gray-400 px-2" />
+                            <input type="text" placeholder="Type your message" className="flex-1 bg-transparent outline-none text-sm text-slate-700 dark:text-slate-200 placeholder-gray-400 px-2" />
                             <div className="flex gap-1">
-                                <div className="p-2 rounded-full text-gray-400 cursor-pointer hover:bg-gray-200">
+                                <div className="p-2 rounded-full text-gray-400 dark:text-slate-500 cursor-pointer hover:bg-gray-200 dark:bg-slate-600">
                                     <ImageIcon size={18} />
                                 </div>
-                                <div className="p-2 rounded-full text-gray-400 cursor-pointer hover:bg-gray-200">
+                                <div className="p-2 rounded-full text-gray-400 dark:text-slate-500 cursor-pointer hover:bg-gray-200 dark:bg-slate-600">
                                     <Mic size={18} />
                                 </div>
                                 <div className="p-2 rounded-full bg-lamaSky text-sky-600 cursor-pointer hover:bg-sky-200">
@@ -2783,7 +2815,7 @@ const MessagesPage = () => {
                 </div>
             </div>
 
-            <div className="flex gap-6 text-xs text-gray-400 pt-2 mt-2">
+            <div className="flex gap-6 text-xs text-gray-400 dark:text-slate-500 pt-2 mt-2">
                 <div className="flex items-center gap-2">
                     <Mail size={14} />
                     <span>emailaddress@mail.com</span>
@@ -2822,7 +2854,7 @@ const NoticePage = () => {
             desc: newNotice.desc,
             tags,
             img: `https://ui-avatars.com/api/?name=${encodeURIComponent(newNotice.title)}&background=C3EBFA&color=1e293b&bold=true&size=256`,
-            bg: 'bg-white',
+            bg: 'bg-white dark:bg-slate-800',
             avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(newNotice.author)}&background=CFCEFF&color=1e293b&bold=true&size=128`,
         };
         setNotices(prev => [notice, ...prev]);
@@ -2834,17 +2866,17 @@ const NoticePage = () => {
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex justify-between items-center">
-                <h1 className="text-xl font-bold text-slate-800">School Notices</h1>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">School Notices</h1>
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                        <Search size={16} className="text-gray-400" />
-                        <input type="text" placeholder="Search notices..." className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 w-[250px]">
+                        <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                        <input type="text" placeholder="Search notices..." className="w-full bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
                     </div>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors"
                     >
-                        <Plus size={16} className="text-slate-800" />
+                        <Plus size={16} className="text-slate-800 dark:text-slate-100" />
                     </button>
                 </div>
             </div>
@@ -2853,18 +2885,18 @@ const NoticePage = () => {
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Add New Notice</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Fill in the notice details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Add New Notice</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Fill in the notice details below</p>
                             </div>
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -2872,54 +2904,54 @@ const NoticePage = () => {
 
                         <div className="p-6 flex flex-col gap-4">
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-slate-600">Title <span className="text-red-400">*</span></label>
+                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Title <span className="text-red-400">*</span></label>
                                 <input
                                     type="text"
                                     placeholder="e.g. School Event Announcement"
                                     value={newNotice.title}
                                     onChange={(e) => setNewNotice({ ...newNotice, title: e.target.value })}
-                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                 />
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Author <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Author <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         placeholder="e.g. Principal Linda Carter"
                                         value={newNotice.author}
                                         onChange={(e) => setNewNotice({ ...newNotice, author: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Tags</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Tags</label>
                                     <input
                                         type="text"
                                         placeholder="e.g. School, Event, Important"
                                         value={newNotice.tags}
                                         onChange={(e) => setNewNotice({ ...newNotice, tags: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
-                                    <span className="text-[10px] text-gray-400">Separate with commas</span>
+                                    <span className="text-[10px] text-gray-400 dark:text-slate-500">Separate with commas</span>
                                 </div>
                             </div>
                             <div className="flex flex-col gap-1.5">
-                                <label className="text-xs font-semibold text-slate-600">Description <span className="text-red-400">*</span></label>
+                                <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Description <span className="text-red-400">*</span></label>
                                 <textarea
                                     placeholder="Write the notice content here..."
                                     value={newNotice.desc}
                                     onChange={(e) => setNewNotice({ ...newNotice, desc: e.target.value })}
                                     rows={4}
-                                    className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all resize-none"
+                                    className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all resize-none"
                                 />
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                             <button
                                 onClick={() => setShowAddModal(false)}
-                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors"
+                                className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors"
                             >
                                 Cancel
                             </button>
@@ -2949,7 +2981,7 @@ const NoticePage = () => {
             {selectedNotice && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setSelectedNotice(null)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
@@ -2963,13 +2995,13 @@ const NoticePage = () => {
                         {/* Header */}
                         <div className="flex items-start justify-between p-6 pb-3">
                             <div className="flex-1">
-                                <h2 className="text-xl font-bold text-slate-800 mb-2">{selectedNotice.title}</h2>
-                                <div className="flex items-center gap-4 text-xs text-gray-400 flex-wrap">
+                                <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">{selectedNotice.title}</h2>
+                                <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-slate-500 flex-wrap">
                                     <div className="flex items-center gap-1.5">
                                         <div className="w-6 h-6 rounded-full overflow-hidden">
                                             <img src={selectedNotice.avatar} alt="" className="w-full h-full object-cover" />
                                         </div>
-                                        <span className="font-medium text-slate-600">{selectedNotice.author}</span>
+                                        <span className="font-medium text-slate-600 dark:text-slate-300">{selectedNotice.author}</span>
                                     </div>
                                     <div className="flex items-center gap-1">
                                         <CalendarDays size={14} />
@@ -2983,7 +3015,7 @@ const NoticePage = () => {
                             </div>
                             <button
                                 onClick={() => setSelectedNotice(null)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors shrink-0 ml-4"
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors shrink-0 ml-4"
                             >
                                 <X size={18} />
                             </button>
@@ -2993,7 +3025,7 @@ const NoticePage = () => {
                         {selectedNotice.tags && selectedNotice.tags.length > 0 && (
                             <div className="px-6 pb-3 flex gap-2 flex-wrap">
                                 {selectedNotice.tags.map(tag => (
-                                    <span key={tag} className="text-[10px] px-2.5 py-1 rounded-full bg-sky-50 text-sky-600 font-semibold">
+                                    <span key={tag} className="text-[10px] px-2.5 py-1 rounded-full bg-sky-50 dark:bg-sky-900/30 text-sky-600 dark:text-sky-400 font-semibold">
                                         {tag}
                                     </span>
                                 ))}
@@ -3002,13 +3034,13 @@ const NoticePage = () => {
 
                         {/* Content */}
                         <div className="px-6 pb-6">
-                            <div className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+                            <div className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed whitespace-pre-line">
                                 {(selectedNotice as any).content || selectedNotice.desc}
                             </div>
                         </div>
 
                         {/* Footer */}
-                        <div className="flex items-center justify-end p-6 pt-4 border-t border-gray-100">
+                        <div className="flex items-center justify-end p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
                             <button
                                 onClick={() => setSelectedNotice(null)}
                                 className="px-5 py-2.5 rounded-xl text-sm font-semibold bg-sky-400 text-white hover:bg-sky-500 transition-colors"
@@ -3020,10 +3052,10 @@ const NoticePage = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 overflow-y-auto custom-scrollbar">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1 overflow-y-auto custom-scrollbar">
                 <div className="flex flex-col gap-6">
                     {notices.map((notice) => (
-                        <div key={notice.id} className={`p-6 rounded-2xl border border-gray-100 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow ${notice.selected ? 'bg-lamaPurpleLight/20' : 'bg-white'}`}>
+                        <div key={notice.id} className={`p-6 rounded-2xl border border-gray-100 dark:border-slate-700 flex flex-col md:flex-row gap-6 hover:shadow-md transition-shadow ${notice.selected ? 'bg-lamaPurpleLight/20 dark:bg-lamaPurpleLightDark/20' : 'bg-white dark:bg-slate-800'}`}>
                             {/* Image */}
                             <div className="w-full md:w-48 h-48 rounded-xl overflow-hidden shrink-0">
                                 <img src={notice.img} alt={notice.title} className="w-full h-full object-cover" />
@@ -3033,8 +3065,8 @@ const NoticePage = () => {
                             <div className="flex-1 flex flex-col">
                                 <div className="flex justify-between items-start mb-2">
                                     <div className="flex flex-col gap-1">
-                                        <h2 className="text-lg font-bold text-slate-800">{notice.title}</h2>
-                                        <div className="flex items-center gap-4 text-xs text-gray-400">
+                                        <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">{notice.title}</h2>
+                                        <div className="flex items-center gap-4 text-xs text-gray-400 dark:text-slate-500">
                                             <div className="flex items-center gap-1">
                                                 <UserCircle size={14} />
                                                 <span>{notice.author}</span>
@@ -3051,14 +3083,14 @@ const NoticePage = () => {
                                     </div>
                                     <div className="flex gap-2">
                                         {notice.tags?.map(tag => (
-                                            <span key={tag} className="text-[10px] px-2 py-1 rounded-full bg-gray-100 text-gray-500 font-medium">
+                                            <span key={tag} className="text-[10px] px-2 py-1 rounded-full bg-gray-100 dark:bg-slate-700 text-gray-500 dark:text-slate-400 font-medium">
                                                 {tag}
                                             </span>
                                         ))}
                                     </div>
                                 </div>
 
-                                <p className="text-sm text-gray-500 leading-relaxed mb-4 line-clamp-3">
+                                <p className="text-sm text-gray-500 dark:text-slate-400 leading-relaxed mb-4 line-clamp-3">
                                     {notice.desc}
                                 </p>
 
@@ -3068,10 +3100,10 @@ const NoticePage = () => {
                                     </button>
 
                                     <div className="flex gap-2">
-                                        <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-slate-600 transition-colors">
+                                        <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors">
                                             <Paperclip size={16} />
                                         </button>
-                                        <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-slate-600 transition-colors">
+                                        <button className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors">
                                             <MoreVertical size={16} />
                                         </button>
                                     </div>
@@ -3082,7 +3114,7 @@ const NoticePage = () => {
                 </div>
 
                 {/* Footer info */}
-                <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
+                <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2">
                         <Mail size={14} />
                         <span>emailaddress@mail.com</span>
@@ -3105,29 +3137,37 @@ const NoticePage = () => {
 
 // --- Layout Components ---
 
-const Navbar = () => {
+const Navbar = ({ isDark, toggleDarkMode }: { isDark: boolean; toggleDarkMode: () => void }) => {
     return (
-        <div className="flex items-center justify-between p-4 bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+        <div className="flex items-center justify-between p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-10">
             {/* Search Bar */}
-            <div className="hidden md:flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white">
-                <Search size={16} className="text-gray-400" />
-                <input type="text" placeholder="Search" className="w-[200px] bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+            <div className="hidden md:flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800">
+                <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                <input type="text" placeholder="Search" className="w-[200px] bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
             </div>
 
             {/* Icons & User */}
             <div className="flex items-center gap-6 justify-end w-full md:w-auto">
-                <div className="bg-white rounded-full w-9 h-9 flex items-center justify-center cursor-pointer relative shadow-sm hover:bg-gray-50 border border-gray-100">
-                    <MessageSquare size={18} className="text-gray-500" />
+                {/* Dark Mode Toggle */}
+                <button
+                    onClick={toggleDarkMode}
+                    className="bg-white dark:bg-slate-800 rounded-full w-9 h-9 flex items-center justify-center cursor-pointer shadow-sm dark:shadow-slate-900/50 hover:bg-gray-50 dark:hover:bg-slate-700 border border-gray-100 dark:border-slate-600 transition-colors"
+                    title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+                >
+                    {isDark ? <Sun size={18} className="text-yellow-400" /> : <Moon size={18} className="text-gray-500" />}
+                </button>
+                <div className="bg-white dark:bg-slate-800 rounded-full w-9 h-9 flex items-center justify-center cursor-pointer relative shadow-sm dark:shadow-slate-900/50 hover:bg-gray-50 dark:hover:bg-slate-700 border border-gray-100 dark:border-slate-600">
+                    <MessageSquare size={18} className="text-gray-500 dark:text-slate-400" />
                 </div>
-                <div className="bg-white rounded-full w-9 h-9 flex items-center justify-center cursor-pointer relative shadow-sm hover:bg-gray-50 border border-gray-100">
-                    <Megaphone size={18} className="text-gray-500" />
-                    <div className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center bg-purple-500 text-white rounded-full text-[10px] border-2 border-white">1</div>
+                <div className="bg-white dark:bg-slate-800 rounded-full w-9 h-9 flex items-center justify-center cursor-pointer relative shadow-sm dark:shadow-slate-900/50 hover:bg-gray-50 dark:hover:bg-slate-700 border border-gray-100 dark:border-slate-600">
+                    <Megaphone size={18} className="text-gray-500 dark:text-slate-400" />
+                    <div className="absolute -top-1 -right-1 w-4 h-4 flex items-center justify-center bg-purple-500 text-white rounded-full text-[10px] border-2 border-white dark:border-slate-900">1</div>
                 </div>
                 <div className="flex flex-col text-right">
-                    <span className="text-sm leading-4 font-semibold text-slate-700">Sophia Wilson</span>
-                    <span className="text-[10px] text-gray-400 text-right">Admin</span>
+                    <span className="text-sm leading-4 font-semibold text-slate-700 dark:text-slate-200">Sophia Wilson</span>
+                    <span className="text-[10px] text-gray-400 dark:text-slate-500 text-right">Admin</span>
                 </div>
-                <div className="w-10 h-10 rounded-full bg-slate-200 overflow-hidden flex items-center justify-center border border-gray-100 shadow-sm">
+                <div className="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex items-center justify-center border border-gray-100 dark:border-slate-600 shadow-sm dark:shadow-slate-900/50">
                     <img src="https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1200" alt="Avatar" className="w-full h-full object-cover" />
                 </div>
             </div>
@@ -3181,16 +3221,16 @@ const Sidebar = ({ activePage, onNavigate }: { activePage: string, onNavigate: (
     return (
         <div className="text-sm h-screen overflow-y-auto flex flex-col custom-scrollbar">
             <div className="flex items-center gap-3 px-6 py-6">
-                <div className="bg-sky-400 rounded-lg p-1.5 flex items-center justify-center shadow-sm">
+                <div className="bg-sky-400 rounded-lg p-1.5 flex items-center justify-center shadow-sm dark:shadow-slate-900/50">
                     <Hexagon size={20} className="text-white fill-white" />
                 </div>
-                <span className="hidden lg:block font-bold text-lg text-slate-800 tracking-tight">SchoolHub</span>
+                <span className="hidden lg:block font-bold text-lg text-slate-800 dark:text-slate-100 tracking-tight">SchoolHub</span>
             </div>
 
             <div className="flex-1 flex flex-col gap-6 px-4">
                 {menuItems.map((i) => (
                     <div className="flex flex-col gap-1" key={i.title}>
-                        <span className="hidden lg:block text-gray-400 font-medium mb-2 uppercase px-2 text-[10px] tracking-wider">
+                        <span className="hidden lg:block text-gray-400 dark:text-slate-500 font-medium mb-2 uppercase px-2 text-[10px] tracking-wider">
                             {i.title}
                         </span>
                         {i.items.map((item) => {
@@ -3204,23 +3244,23 @@ const Sidebar = ({ activePage, onNavigate }: { activePage: string, onNavigate: (
                                     <button
                                         onClick={() => handleItemClick(item.id)}
                                         className={`flex items-center justify-center lg:justify-start gap-3 py-2.5 px-3 rounded-lg transition-all duration-200 w-full text-left ${isActive
-                                            ? "bg-sky-100 text-sky-600 font-medium"
-                                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                                            ? "bg-sky-100 dark:bg-sky-900/40 text-sky-600 dark:text-sky-400 font-medium"
+                                            : "text-gray-500 dark:text-slate-400 hover:bg-gray-50 dark:hover:bg-slate-700 hover:text-gray-700 dark:hover:text-slate-200"
                                             }`}
                                     >
                                         {item.icon}
                                         <span className="hidden lg:block flex-1 text-sm">{item.label}</span>
-                                        {item.hasSubmenu && <ChevronRight size={16} className={`hidden lg:block transition-transform ${isActive ? 'rotate-90 text-sky-600' : 'text-gray-400'}`} />}
+                                        {item.hasSubmenu && <ChevronRight size={16} className={`hidden lg:block transition-transform ${isActive ? 'rotate-90 text-sky-600 dark:text-sky-400' : 'text-gray-400 dark:text-slate-500'}`} />}
                                     </button>
 
                                     {/* Submenu */}
                                     {item.submenu && isActive && (
-                                        <div className="ml-9 mt-1 flex flex-col gap-1 border-l-2 border-gray-100 pl-3">
+                                        <div className="ml-9 mt-1 flex flex-col gap-1 border-l-2 border-gray-100 dark:border-slate-700 pl-3">
                                             {item.submenu.map(sub => (
                                                 <button
                                                     key={sub.label}
                                                     onClick={(e) => { e.stopPropagation(); onNavigate(sub.id); }}
-                                                    className={`text-left text-xs py-1.5 px-2 rounded-md block w-full transition-colors ${activePage === sub.id ? 'text-slate-800 font-bold bg-gray-50' : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'}`}
+                                                    className={`text-left text-xs py-1.5 px-2 rounded-md block w-full transition-colors ${activePage === sub.id ? 'text-slate-800 dark:text-slate-100 font-bold bg-gray-50 dark:bg-slate-700' : 'text-gray-500 dark:text-slate-400 hover:text-gray-800 dark:hover:text-slate-200 hover:bg-gray-50 dark:hover:bg-slate-700'}`}
                                                 >
                                                     {sub.label}
                                                 </button>
@@ -3248,42 +3288,161 @@ const FinancePage = () => {
 
 const AttendancePage = () => {
     const days = [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21];
-    const [attendance, setAttendance] = useState(() =>
-        attendanceTableData.map(s => ({ ...s, attendance: { ...s.attendance } }))
-    );
+    const attendanceMonth = '2024-04'; // April 2024
+
+    const [attendance, setAttendance] = useState<any[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [currentPage, setCurrentPage] = useState(1);
+
+    // Helper: convert status from DB text to internal value
+    const dbStatusToInternal = (status: string | null): boolean | string | null => {
+        if (status === 'present') return true;
+        if (status === 'absent') return false;
+        if (status === 'leave') return 'leave';
+        return null;
+    };
+
+    // Helper: convert internal status to DB text
+    const internalStatusToDb = (status: boolean | string | null): string | null => {
+        if (status === true) return 'present';
+        if (status === false) return 'absent';
+        if (status === 'leave') return 'leave';
+        return null;
+    };
+
+    // Fetch students + attendance from Supabase on mount
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const { supabase } = await import('./supabaseClient');
+
+                // 1. Fetch all students to get real IDs
+                const { data: studentsData, error: studentsError } = await supabase
+                    .from('students')
+                    .select('id, name, student_id')
+                    .order('id', { ascending: true });
+
+                if (studentsError || !studentsData) {
+                    console.warn('Failed to fetch students:', studentsError?.message);
+                    setAttendance(attendanceTableData.map(s => ({ ...s, studentDbId: String(s.id), attendance: { ...s.attendance } })));
+                    setIsLoading(false);
+                    return;
+                }
+
+                // 2. Build attendance array from real students, all days null initially
+                const studentList = studentsData.map((s: any) => ({
+                    id: s.id,
+                    studentDbId: s.student_id,  // Use the text student_id field for FK
+                    name: s.name,
+                    attendance: Object.fromEntries(days.map(d => [d, null]))
+                }));
+
+                // 3. Fetch attendance records for this month
+                const { data: attendanceData, error: attendanceError } = await supabase
+                    .from('attendance')
+                    .select('*')
+                    .gte('date', `${attendanceMonth}-01`)
+                    .lte('date', `${attendanceMonth}-30`);
+
+                if (!attendanceError && attendanceData) {
+                    // Fill in attendance from DB records
+                    attendanceData.forEach((record: any) => {
+                        const student = studentList.find((s: any) => String(s.studentDbId) === String(record.student_id));
+                        if (student) {
+                            const day = new Date(record.date).getUTCDate();
+                            student.attendance[day] = dbStatusToInternal(record.status);
+                        }
+                    });
+                }
+
+                setAttendance(studentList);
+            } catch (e) {
+                console.warn('Supabase not available for attendance, using local data.');
+                setAttendance(attendanceTableData.map(s => ({ ...s, studentDbId: String(s.id), attendance: { ...s.attendance } })));
+            }
+            setIsLoading(false);
+        };
+        fetchData();
+    }, []);
 
     const ITEMS_PER_PAGE = 10;
     const totalPages = Math.ceil(attendance.length / ITEMS_PER_PAGE);
     const paginatedAttendance = attendance.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
 
-    const toggleAttendance = (studentId: number, day: number) => {
+    const toggleAttendance = async (studentId: number, day: number) => {
+        // Find the student FIRST to get current status and DB ID
+        const student = attendance.find(s => s.id === studentId);
+        if (!student) return;
+
+        const current = student.attendance[day as keyof typeof student.attendance];
+        // Cycle: null -> true -> false -> 'leave' -> null
+        const nextStatus = current === null ? true : current === true ? false : current === false ? 'leave' : null;
+
+        // Update UI state
         setAttendance(prev => prev.map(s => {
             if (s.id !== studentId) return s;
-            const current = s.attendance[day as keyof typeof s.attendance];
-            // Cycle: null -> true -> false -> 'leave' -> null
-            const next = current === null ? true : current === true ? false : current === false ? 'leave' : null;
-            return { ...s, attendance: { ...s.attendance, [day]: next } };
+            return { ...s, attendance: { ...s.attendance, [day]: nextStatus } };
         }));
+
+        const dateStr = `${attendanceMonth}-${String(day).padStart(2, '0')}`;
+        const dbStatus = internalStatusToDb(nextStatus);
+        const sid = student.studentDbId || String(studentId);
+
+        try {
+            const { supabase } = await import('./supabaseClient');
+
+            if (dbStatus === null) {
+                await supabase
+                    .from('attendance')
+                    .delete()
+                    .eq('student_id', sid)
+                    .eq('date', dateStr);
+            } else {
+                const { data: existing } = await supabase
+                    .from('attendance')
+                    .select('id')
+                    .eq('student_id', sid)
+                    .eq('date', dateStr)
+                    .maybeSingle();
+
+                if (existing) {
+                    await supabase
+                        .from('attendance')
+                        .update({ status: dbStatus })
+                        .eq('id', existing.id);
+                } else {
+                    await supabase
+                        .from('attendance')
+                        .insert([{
+                            student_id: sid,
+                            student_name: student.name,
+                            date: dateStr,
+                            status: dbStatus,
+                        }]);
+                }
+            }
+        } catch (e) {
+            console.warn('Supabase not available for saving attendance.');
+        }
     };
 
     return (
         <div className="p-6 flex flex-col gap-6 h-full">
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1 flex flex-col">
                 {/* Header */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
-                    <h2 className="text-xl font-bold text-slate-800">Attendance</h2>
+                    <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Attendance</h2>
                     <div className="flex flex-wrap gap-4">
-                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full text-xs font-semibold text-gray-500 hover:bg-gray-100">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-slate-700 rounded-full text-xs font-semibold text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700">
                             <CalendarDays size={14} />
                             <span>April 2024</span>
                             <ChevronRight size={14} className="rotate-90" />
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full text-xs font-semibold text-gray-500 hover:bg-gray-100">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-slate-700 rounded-full text-xs font-semibold text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700">
                             <span>Week 2-3</span>
                             <ChevronRight size={14} className="rotate-90" />
                         </button>
-                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full text-xs font-semibold text-gray-500 hover:bg-gray-100">
+                        <button className="flex items-center gap-2 px-4 py-2 bg-gray-50 dark:bg-slate-700 rounded-full text-xs font-semibold text-gray-500 dark:text-slate-400 hover:bg-gray-100 dark:hover:bg-slate-700">
                             <span>Class 11A</span>
                             <ChevronRight size={14} className="rotate-90" />
                         </button>
@@ -3294,7 +3453,7 @@ const AttendancePage = () => {
                 <div className="overflow-x-auto flex-1">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="text-gray-500 text-xs font-semibold border-b border-gray-100 bg-lamaSkyLight">
+                            <tr className="text-gray-500 dark:text-slate-400 text-xs font-semibold border-b border-gray-100 dark:border-slate-700 bg-lamaSkyLight dark:bg-lamaSkyLightDark">
                                 <th className="p-4 min-w-[150px] rounded-tl-xl rounded-bl-xl">Student Name</th>
                                 {days.map((d, index) => (
                                     <th key={d} className={`p-4 text-center min-w-[40px] ${index === days.length - 1 ? 'rounded-tr-xl rounded-br-xl' : ''}`}>{String(d).padStart(2, '0')}</th>
@@ -3303,8 +3462,8 @@ const AttendancePage = () => {
                         </thead>
                         <tbody>
                             {paginatedAttendance.map(student => (
-                                <tr key={student.id} className="hover:bg-gray-50 transition-colors border-b border-gray-50 last:border-none group">
-                                    <td className="p-4 text-sm font-semibold text-slate-700">{student.name}</td>
+                                <tr key={student.id} className="hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors border-b border-gray-50 last:border-none group">
+                                    <td className="p-4 text-sm font-semibold text-slate-700 dark:text-slate-200">{student.name}</td>
                                     {days.map(d => {
                                         const status = student.attendance[d as keyof typeof student.attendance];
                                         return (
@@ -3314,23 +3473,23 @@ const AttendancePage = () => {
                                                     onClick={() => toggleAttendance(student.id, d)}
                                                 >
                                                     {status === true && (
-                                                        <div className="w-6 h-6 rounded-full bg-sky-400 flex items-center justify-center text-white shadow-sm hover:bg-sky-500 transition-colors">
+                                                        <div className="w-6 h-6 rounded-full bg-sky-400 flex items-center justify-center text-white shadow-sm dark:shadow-slate-900/50 hover:bg-sky-500 transition-colors">
                                                             <Check size={12} strokeWidth={3} />
                                                         </div>
                                                     )}
                                                     {status === false && (
-                                                        <div className="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center text-white shadow-sm hover:bg-red-500 transition-colors">
+                                                        <div className="w-6 h-6 rounded-full bg-red-400 flex items-center justify-center text-white shadow-sm dark:shadow-slate-900/50 hover:bg-red-500 transition-colors">
                                                             <X size={12} strokeWidth={3} />
                                                         </div>
                                                     )}
                                                     {status === 'leave' && (
-                                                        <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-white shadow-sm hover:bg-yellow-500 transition-colors">
+                                                        <div className="w-6 h-6 rounded-full bg-yellow-400 flex items-center justify-center text-white shadow-sm dark:shadow-slate-900/50 hover:bg-yellow-500 transition-colors">
                                                             <span className="text-white text-xs font-bold">-</span>
                                                         </div>
                                                     )}
                                                     {status === null && (
-                                                        <div className="w-6 h-6 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-sky-400 hover:bg-sky-50 transition-colors">
-                                                            <span className="text-gray-300 text-xs">-</span>
+                                                        <div className="w-6 h-6 rounded-full border-2 border-dashed border-gray-300 dark:border-slate-600 flex items-center justify-center hover:border-sky-400 hover:bg-sky-50 transition-colors">
+                                                            <span className="text-gray-300 dark:text-slate-500 text-xs">-</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -3348,22 +3507,22 @@ const AttendancePage = () => {
                         <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => p - 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Previous
                         </button>
-                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Page {currentPage} of {totalPages}</span>
                         <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(p => p + 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Next
                         </button>
                     </div>
                 )}
 
-                <div className="mt-8 flex gap-6 text-xs text-gray-400 pt-2">
+                <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 pt-2">
                     <div className="flex items-center gap-2">
                         <Mail size={14} />
                         <span>emailaddress@mail.com</span>
@@ -3390,10 +3549,10 @@ const DashboardPage = () => {
             <div className="w-full lg:w-2/3 flex flex-col gap-4">
                 {/* Stats Cards */}
                 <div className="flex gap-4 justify-between flex-wrap">
-                    <UserCard type="student" count="6,123" date="2024/25" bg="bg-lamaPurpleLight" />
-                    <UserCard type="teacher" count="1,234" date="2024/25" bg="bg-lamaYellowLight" />
-                    <UserCard type="parent" count="5,231" date="2024/25" bg="bg-lamaPurpleLight" />
-                    <UserCard type="staff" count="1,032" date="2024/25" bg="bg-lamaYellowLight" />
+                    <UserCard type="student" count="6,123" date="2024/25" bg="bg-lamaPurpleLight dark:bg-lamaPurpleLightDark" />
+                    <UserCard type="teacher" count="1,234" date="2024/25" bg="bg-lamaYellowLight dark:bg-lamaYellowLightDark" />
+                    <UserCard type="parent" count="5,231" date="2024/25" bg="bg-lamaPurpleLight dark:bg-lamaPurpleLightDark" />
+                    <UserCard type="staff" count="1,032" date="2024/25" bg="bg-lamaYellowLight dark:bg-lamaYellowLightDark" />
                 </div>
 
                 {/* Middle Section: Count & Attendance */}
@@ -3549,20 +3708,20 @@ const CoursesPage = () => {
     return (
         <div className="p-6 h-full flex flex-col gap-6">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-                <h1 className="text-xl font-bold text-slate-800">All Courses</h1>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-slate-100">All Courses</h1>
                 <div className="flex items-center gap-4 flex-wrap">
-                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 px-4 py-2 bg-white w-[250px]">
-                        <Search size={16} className="text-gray-400" />
-                        <input type="text" placeholder="Search courses..." className="w-full bg-transparent outline-none text-gray-600 placeholder-gray-400" />
+                    <div className="flex items-center gap-2 text-xs rounded-full ring-[1.5px] ring-gray-200 dark:ring-slate-600 px-4 py-2 bg-white dark:bg-slate-800 w-[250px]">
+                        <Search size={16} className="text-gray-400 dark:text-slate-500" />
+                        <input type="text" placeholder="Search courses..." className="w-full bg-transparent outline-none text-gray-600 dark:text-slate-300 placeholder-gray-400 dark:placeholder-slate-500" />
                     </div>
                     <button className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors">
-                        <Sliders size={16} className="text-slate-800 rotate-90" />
+                        <Sliders size={16} className="text-slate-800 dark:text-slate-100 rotate-90" />
                     </button>
                     <button
                         onClick={() => setShowAddModal(true)}
                         className="w-8 h-8 rounded-full bg-lamaYellow flex items-center justify-center cursor-pointer hover:bg-lamaYellowLight transition-colors"
                     >
-                        <Plus size={16} className="text-slate-800" />
+                        <Plus size={16} className="text-slate-800 dark:text-slate-100" />
                     </button>
                 </div>
             </div>
@@ -3571,16 +3730,16 @@ const CoursesPage = () => {
             {showAddModal && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setShowAddModal(false)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Add New Course</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Fill in the course details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Add New Course</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Fill in the course details below</p>
                             </div>
-                            <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors">
+                            <button onClick={() => setShowAddModal(false)} className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors">
                                 <X size={18} />
                             </button>
                         </div>
@@ -3588,42 +3747,42 @@ const CoursesPage = () => {
                         <div className="p-6 flex flex-col gap-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Course Name <span className="text-red-400">*</span></label>
-                                    <input type="text" placeholder="e.g. Advanced Mathematics" value={newCourse.name} onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Course Name <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. Advanced Mathematics" value={newCourse.name} onChange={(e) => setNewCourse({ ...newCourse, name: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Course Code <span className="text-red-400">*</span></label>
-                                    <input type="text" placeholder="e.g. MATH-301" value={newCourse.code} onChange={(e) => setNewCourse({ ...newCourse, code: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Course Code <span className="text-red-400">*</span></label>
+                                    <input type="text" placeholder="e.g. MATH-301" value={newCourse.code} onChange={(e) => setNewCourse({ ...newCourse, code: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Teacher</label>
-                                    <input type="text" placeholder="e.g. Dean Guerrero" value={newCourse.teacher} onChange={(e) => setNewCourse({ ...newCourse, teacher: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Teacher</label>
+                                    <input type="text" placeholder="e.g. Dean Guerrero" value={newCourse.teacher} onChange={(e) => setNewCourse({ ...newCourse, teacher: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Class</label>
-                                    <input type="text" placeholder="e.g. 12A" value={newCourse.class} onChange={(e) => setNewCourse({ ...newCourse, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Class</label>
+                                    <input type="text" placeholder="e.g. 12A" value={newCourse.class} onChange={(e) => setNewCourse({ ...newCourse, class: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Schedule</label>
-                                    <input type="text" placeholder="e.g. Mon, Wed, Fri" value={newCourse.schedule} onChange={(e) => setNewCourse({ ...newCourse, schedule: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Schedule</label>
+                                    <input type="text" placeholder="e.g. Mon, Wed, Fri" value={newCourse.schedule} onChange={(e) => setNewCourse({ ...newCourse, schedule: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Duration</label>
-                                    <input type="text" placeholder="e.g. 1 hour" value={newCourse.duration} onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Duration</label>
+                                    <input type="text" placeholder="e.g. 1 hour" value={newCourse.duration} onChange={(e) => setNewCourse({ ...newCourse, duration: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Max Students</label>
-                                    <input type="number" placeholder="e.g. 30" value={newCourse.students} onChange={(e) => setNewCourse({ ...newCourse, students: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all" />
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Max Students</label>
+                                    <input type="number" placeholder="e.g. 30" value={newCourse.students} onChange={(e) => setNewCourse({ ...newCourse, students: e.target.value })} className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all" />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
-                            <button onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
+                            <button onClick={() => setShowAddModal(false)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Cancel</button>
                             <button
                                 onClick={handleAddCourse}
                                 disabled={!newCourse.name || !newCourse.code || isSubmitting}
@@ -3644,18 +3803,18 @@ const CoursesPage = () => {
             {editingCourse && (
                 <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4" onClick={() => setEditingCourse(null)}>
                     <div
-                        className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
+                        className="bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
                         onClick={(e) => e.stopPropagation()}
                         style={{ animation: 'modalSlideIn 0.3s ease-out' }}
                     >
-                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100">
+                        <div className="flex items-center justify-between p-6 pb-4 border-b border-gray-100 dark:border-slate-700">
                             <div>
-                                <h2 className="text-lg font-bold text-slate-800">Edit Course</h2>
-                                <p className="text-xs text-gray-400 mt-0.5">Update the course details below</p>
+                                <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Edit Course</h2>
+                                <p className="text-xs text-gray-400 dark:text-slate-500 mt-0.5">Update the course details below</p>
                             </div>
                             <button
                                 onClick={() => setEditingCourse(null)}
-                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 text-gray-400 hover:text-gray-600 transition-colors"
+                                className="w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-700 text-gray-400 dark:text-slate-500 hover:text-gray-600 dark:hover:text-slate-300 dark:text-slate-300 transition-colors"
                             >
                                 <X size={18} />
                             </button>
@@ -3664,77 +3823,77 @@ const CoursesPage = () => {
                         <div className="p-6 flex flex-col gap-4">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Course Name <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Course Name <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         value={editForm.name}
                                         onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Course Code <span className="text-red-400">*</span></label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Course Code <span className="text-red-400">*</span></label>
                                     <input
                                         type="text"
                                         value={editForm.code}
                                         onChange={(e) => setEditForm({ ...editForm, code: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Teacher</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Teacher</label>
                                     <input
                                         type="text"
                                         value={editForm.teacher}
                                         onChange={(e) => setEditForm({ ...editForm, teacher: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Class</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Class</label>
                                     <input
                                         type="text"
                                         value={editForm.class}
                                         onChange={(e) => setEditForm({ ...editForm, class: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Schedule</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Schedule</label>
                                     <input
                                         type="text"
                                         value={editForm.schedule}
                                         onChange={(e) => setEditForm({ ...editForm, schedule: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Duration</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Duration</label>
                                     <input
                                         type="text"
                                         value={editForm.duration}
                                         onChange={(e) => setEditForm({ ...editForm, duration: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                                 <div className="flex flex-col gap-1.5">
-                                    <label className="text-xs font-semibold text-slate-600">Max Students</label>
+                                    <label className="text-xs font-semibold text-slate-600 dark:text-slate-300">Max Students</label>
                                     <input
                                         type="number"
                                         value={editForm.students}
                                         onChange={(e) => setEditForm({ ...editForm, students: e.target.value })}
-                                        className="px-4 py-2.5 rounded-xl border border-gray-200 text-sm text-slate-700 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 focus:border-sky-400 transition-all"
+                                        className="px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm text-slate-700 dark:text-slate-200 placeholder-gray-300 outline-none focus:ring-2 focus:ring-sky-200 dark:focus:ring-sky-800 focus:border-sky-400 dark:focus:border-sky-600 transition-all"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100">
-                            <button onClick={() => setEditingCourse(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-gray-100 transition-colors">Cancel</button>
+                        <div className="flex items-center justify-end gap-3 p-6 pt-4 border-t border-gray-100 dark:border-slate-700">
+                            <button onClick={() => setEditingCourse(null)} className="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-100 dark:hover:bg-slate-700 transition-colors">Cancel</button>
                             <button
                                 onClick={handleEditCourse}
                                 disabled={!editForm.name || !editForm.code || isSubmitting}
@@ -3751,10 +3910,10 @@ const CoursesPage = () => {
                 </div>
             )}
 
-            <div className="bg-white rounded-3xl p-6 shadow-sm flex-1 flex flex-col">
+            <div className="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm dark:shadow-slate-900/50 flex-1 flex flex-col">
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left text-sm text-gray-500">
-                        <thead className="bg-lamaPurpleLight text-slate-700 font-semibold">
+                    <table className="w-full text-left text-sm text-gray-500 dark:text-slate-400">
+                        <thead className="bg-lamaPurpleLight dark:bg-lamaPurpleLightDark text-slate-700 dark:text-slate-200 font-semibold">
                             <tr>
                                 <th className="p-4 rounded-tl-xl rounded-bl-xl w-10">
                                     <input
@@ -3764,7 +3923,7 @@ const CoursesPage = () => {
                                             const checked = e.target.checked;
                                             setCourses(prev => prev.map(c => ({ ...c, selected: checked })));
                                         }}
-                                        className="w-4 h-4 rounded border-gray-300 text-purple-500 focus:ring-purple-500 cursor-pointer"
+                                        className="w-4 h-4 rounded border-gray-300 dark:border-slate-600 text-purple-500 focus:ring-purple-500 cursor-pointer"
                                     />
                                 </th>
                                 <th className="p-4">Course Name</th>
@@ -3778,13 +3937,13 @@ const CoursesPage = () => {
                                 <th className="p-4 rounded-tr-xl rounded-br-xl">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-50">
+                        <tbody className="divide-y divide-gray-50 dark:divide-slate-700">
                             {paginatedCourses.map((course) => (
-                                <tr key={course.id} className={`group hover:bg-gray-50 transition-colors ${course.selected ? 'bg-purple-50/50 hover:bg-purple-50' : ''}`}>
+                                <tr key={course.id} className={`group hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors ${course.selected ? 'bg-purple-50/50 dark:bg-purple-900/20 hover:bg-purple-50' : ''}`}>
                                     <td className="p-4">
                                         <div
                                             onClick={() => setCourses(prev => prev.map(c => c.id === course.id ? { ...c, selected: !c.selected } : c))}
-                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${course.selected ? 'bg-purple-400 border-purple-400' : 'border-gray-300'}`}
+                                            className={`w-4 h-4 rounded flex items-center justify-center border cursor-pointer ${course.selected ? 'bg-purple-400 border-purple-400' : 'border-gray-300 dark:border-slate-600'}`}
                                         >
                                             {course.selected && <Check size={12} className="text-white" />}
                                         </div>
@@ -3794,33 +3953,33 @@ const CoursesPage = () => {
                                             <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0">
                                                 <img src={course.img} alt={course.name} className="w-full h-full object-cover" />
                                             </div>
-                                            <span className="font-semibold text-slate-800">{course.name}</span>
+                                            <span className="font-semibold text-slate-800 dark:text-slate-100">{course.name}</span>
                                         </div>
                                     </td>
                                     <td className="p-4">
-                                        <span className="bg-lamaPurpleLight px-2.5 py-1 rounded-lg text-xs font-bold text-purple-600">{course.code}</span>
+                                        <span className="bg-lamaPurpleLight dark:bg-lamaPurpleLightDark px-2.5 py-1 rounded-lg text-xs font-bold text-purple-600">{course.code}</span>
                                     </td>
-                                    <td className="p-4 text-slate-600 font-medium">{course.teacher}</td>
-                                    <td className="p-4 font-medium text-slate-800">{course.class}</td>
-                                    <td className="p-4 text-slate-600 text-xs">{course.schedule}</td>
-                                    <td className="p-4 text-slate-600 text-xs">{course.duration}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300 font-medium">{course.teacher}</td>
+                                    <td className="p-4 font-medium text-slate-800 dark:text-slate-100">{course.class}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300 text-xs">{course.schedule}</td>
+                                    <td className="p-4 text-slate-600 dark:text-slate-300 text-xs">{course.duration}</td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-1.5">
-                                            <Users size={14} className="text-gray-400" />
-                                            <span className="font-semibold text-slate-700">{course.students}</span>
+                                            <Users size={14} className="text-gray-400 dark:text-slate-500" />
+                                            <span className="font-semibold text-slate-700 dark:text-slate-200">{course.students}</span>
                                         </div>
                                     </td>
                                     <td className="p-4">
-                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${course.status === 'Active' ? 'bg-green-50 text-green-600 border border-green-200' : 'bg-gray-50 text-gray-400 border border-gray-200'}`}>
+                                        <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold ${course.status === 'Active' ? 'bg-green-50 dark:bg-green-900/30 text-green-600 border border-green-200 dark:border-green-800' : 'bg-gray-50 dark:bg-slate-700 text-gray-400 dark:text-slate-500 border border-gray-200 dark:border-slate-700'}`}>
                                             {course.status}
                                         </span>
                                     </td>
                                     <td className="p-4">
                                         <div className="flex items-center gap-2">
-                                            <button onClick={() => openEditCourseModal(course)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 text-gray-400 hover:text-purple-600 transition-colors">
+                                            <button onClick={() => openEditCourseModal(course)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-purple-100 dark:bg-purple-900/40 dark:hover:bg-purple-900/30 text-gray-400 dark:text-slate-500 hover:text-purple-600 transition-colors">
                                                 <FilePenLine size={14} />
                                             </button>
-                                            <button onClick={() => handleDeleteCourse(course.id)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 text-gray-400 hover:text-red-500 transition-colors">
+                                            <button onClick={() => handleDeleteCourse(course.id)} className="w-7 h-7 rounded-full flex items-center justify-center hover:bg-red-100 dark:hover:bg-red-900/30 text-gray-400 dark:text-slate-500 hover:text-red-500 transition-colors">
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
@@ -3836,22 +3995,22 @@ const CoursesPage = () => {
                         <button
                             disabled={currentPage === 1}
                             onClick={() => setCurrentPage(p => p - 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Previous
                         </button>
-                        <span className="text-xs text-gray-500 font-medium">Page {currentPage} of {totalPages}</span>
+                        <span className="text-xs text-gray-500 dark:text-slate-400 font-medium">Page {currentPage} of {totalPages}</span>
                         <button
                             disabled={currentPage === totalPages}
                             onClick={() => setCurrentPage(p => p + 1)}
-                            className="px-3 py-1.5 border border-gray-200 rounded-lg text-xs font-semibold text-slate-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="px-3 py-1.5 border border-gray-200 dark:border-slate-700 rounded-lg text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                             Next
                         </button>
                     </div>
                 )}
 
-                <div className="mt-8 flex gap-6 text-xs text-gray-400 border-t border-gray-100 pt-6 justify-center md:justify-start">
+                <div className="mt-8 flex gap-6 text-xs text-gray-400 dark:text-slate-500 border-t border-gray-100 dark:border-slate-700 pt-6 justify-center md:justify-start">
                     <div className="flex items-center gap-2"><Mail size={14} /><span>emailaddress@mail.com</span></div>
                     <div className="flex items-center gap-2"><Phone size={14} /><span>+82 1234 5678</span></div>
                     <div className="ml-auto flex gap-4 hidden md:flex">
@@ -3867,17 +4026,18 @@ const CoursesPage = () => {
 
 const App = () => {
     const [activePage, setActivePage] = useState('dashboard');
+    const { isDark, toggleDarkMode } = useDarkMode();
 
     return (
         <div className="flex min-h-screen">
             {/* Sidebar - Fixed width */}
-            <div className="w-[16%] md:w-[250px] border-r border-gray-200 bg-white sticky top-0 h-screen hidden md:block shrink-0">
+            <div className="w-[16%] md:w-[250px] border-r border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-0 h-screen hidden md:block shrink-0">
                 <Sidebar activePage={activePage} onNavigate={setActivePage} />
             </div>
 
             {/* Main Content */}
-            <div className="flex-1 bg-white overflow-y-auto flex flex-col h-screen">
-                <Navbar />
+            <div className="flex-1 bg-white dark:bg-slate-950 overflow-y-auto flex flex-col h-screen">
+                <Navbar isDark={isDark} toggleDarkMode={toggleDarkMode} />
                 {activePage === 'dashboard' && <DashboardPage />}
                 {(activePage === 'finance' || activePage === 'finance-fees') && <FinancePage />}
                 {activePage === 'finance-expenses' && <ExpensesPage />}
